@@ -7,7 +7,7 @@
    altında lisanslanmıştır. Lisans metni için: LICENSE dosyası
 
    Ses kayıtları ve görsel içerik farklı lisanslara tabidir,
-ayrıntılar için: LICENSE-CONTENT.md
+   ayrıntılar için: LICENSE-CONTENT.md
 
    Strateji:
    - Kabuk dosyaları (HTML, manifest, ikonlar):
@@ -19,15 +19,15 @@ ayrıntılar için: LICENSE-CONTENT.md
      önbellekten sun (yedek: sistem fontu CSS'de zaten var).
 ───────────────────────────────────────────── */
 
-const CACHE_VERSION = 'duygevse-v1';
-const CACHE_STATIC  = 'duygevse-static-v1';
-const CACHE_MEDIA   = 'duygevse-media-v1';
-const CACHE_FONTS   = 'duygevse-fonts-v1';
+const CACHE_VERSION = 'duygevse-v2';
+const CACHE_STATIC  = 'duygevse-static-v2';
+const CACHE_MEDIA   = 'duygevse-media-v2';
+const CACHE_FONTS   = 'duygevse-fonts-v2';
 
 /* Uygulama kabuğu — bunlar mutlaka önbelleğe alınsın */
 const STATIC_ASSETS = [
   './',
-  './boyun-uyku.html',
+  './index.html',
   './manifest.json',
   './icon-512.png',
   './icon-192.png',
@@ -40,6 +40,12 @@ self.addEventListener('install', event => {
     caches.open(CACHE_STATIC)
       .then(cache => cache.addAll(STATIC_ASSETS))
       .then(() => self.skipWaiting())
+      .catch(err => {
+        /* Bir dosya bile eksikse cache.addAll tüm kaydı iptal eder.
+           Hatayı konsola yaz ki teşhis kolaylaşsın. */
+        console.error('SW kurulum hatası:', err);
+        throw err;
+      })
   );
 });
 
