@@ -1,0 +1,1839 @@
+<!DOCTYPE html>
+<html lang="tr">
+<head>
+<meta charset="UTF-8">
+<meta name="viewport" content="width=device-width, initial-scale=1.0">
+<meta name="theme-color" content="#0a1628">
+<meta name="apple-mobile-web-app-capable" content="yes">
+<title>Duy ve Gevşe</title>
+<style>
+@import url('https://fonts.googleapis.com/css2?family=IBM+Plex+Sans:wght@300;400;500;600&family=IBM+Plex+Mono:wght@400;500&display=swap');
+
+:root {
+  --bg0: #07111f;
+  --bg1: #0d1e30;
+  --bg2: #122438;
+  --bg3: #1a3048;
+  --border: rgba(100,160,220,0.12);
+  --border2: rgba(100,160,220,0.22);
+  --text1: #ddeeff;
+  --text2: #8bb4cc;
+  --text3: #4d7a98;
+  --accent: #3a9dd4;
+  --accent2: #5fc4a0;
+  --accent3: #e07e50;
+  --accent4: #c97bc4;
+  --warm: #e8a060;
+  --red: #e05858;
+  --font: 'IBM Plex Sans', system-ui, sans-serif;
+  --mono: 'IBM Plex Mono', monospace;
+  --r: 10px;
+  --r2: 16px;
+}
+
+*, *::before, *::after { box-sizing: border-box; margin: 0; padding: 0; }
+html { font-size: 15px; scroll-behavior: smooth; }
+
+body {
+  font-family: var(--font);
+  background: var(--bg0);
+  color: var(--text1);
+  min-height: 100vh;
+  overflow-x: hidden;
+}
+
+/* ───── Nav ───── */
+nav {
+  position: fixed; bottom: 0; left: 0; right: 0; z-index: 100;
+  background: rgba(7,17,31,0.95);
+  backdrop-filter: blur(12px);
+  border-top: 1px solid var(--border);
+  display: flex; align-items: stretch;
+  padding: 0; height: 60px;
+  /* iOS safe area desteği */
+  padding-bottom: env(safe-area-inset-bottom);
+}
+.nav-logo {
+  display: none;
+}
+.nav-logo-text { display: none; }
+.nav-btn {
+  background: none; border: none; cursor: pointer;
+  color: var(--text3); font-family: var(--font);
+  font-size: 11px; font-weight: 500;
+  padding: 0 4px; border-radius: 0;
+  transition: all .2s; white-space: nowrap;
+  flex: 1; text-align: center;
+  display: flex; flex-direction: column;
+  align-items: center; justify-content: center; gap: 3px;
+}
+.nav-btn::before {
+  content: attr(data-icon);
+  font-size: 15px; line-height: 1;
+  opacity: 0.7;
+}
+.nav-btn:hover { color: var(--text2); }
+.nav-btn.active { color: var(--accent); }
+.nav-btn.active::before { opacity: 1; }
+@media (max-width: 400px) {
+  .nav-btn { font-size: 10px; }
+}
+
+/* ───── Top header ───── */
+#app-header {
+  position: fixed; top: 0; left: 0; right: 0; z-index: 100;
+  background: rgba(7,17,31,0.95);
+  backdrop-filter: blur(12px);
+  border-bottom: 1px solid var(--border);
+  height: 44px; display: flex; align-items: center;
+  padding: 0 16px; gap: 8px;
+}
+.app-header-logo { color: var(--accent); font-size: 16px; }
+.app-header-title {
+  font-size: 14px; font-weight: 600; color: var(--text1);
+  letter-spacing: 0.03em; flex: 1;
+}
+.app-header-phase {
+  font-size: 11px; font-weight: 600;
+  padding: 2px 8px; border-radius: 20px;
+  background: var(--bg3); color: var(--text2);
+  letter-spacing: 0.04em;
+}
+
+/* ───── Pages ───── */
+.page { display: none; padding: 60px 16px calc(70px + env(safe-area-inset-bottom)); max-width: 720px; margin: 0 auto; }
+.page.active { display: block; }
+
+/* ───── Section headers ───── */
+.section-title {
+  font-size: 11px; font-weight: 600; letter-spacing: 0.1em;
+  color: var(--text3); text-transform: uppercase; margin-bottom: 12px;
+}
+h2 { font-size: 20px; font-weight: 500; color: var(--text1); margin-bottom: 6px; }
+.subtitle { font-size: 14px; color: var(--text2); line-height: 1.6; margin-bottom: 20px; }
+
+/* ───── Cards ───── */
+.card {
+  background: var(--bg1);
+  border: 1px solid var(--border);
+  border-radius: var(--r2);
+  padding: 18px;
+  margin-bottom: 12px;
+}
+.card-sm {
+  background: var(--bg2);
+  border: 1px solid var(--border);
+  border-radius: var(--r);
+  padding: 14px 16px;
+  margin-bottom: 8px;
+}
+
+/* ───── Buttons ───── */
+.btn {
+  display: inline-flex; align-items: center; gap: 7px;
+  background: var(--accent); color: #fff;
+  border: none; border-radius: 8px;
+  padding: 10px 18px; font-family: var(--font);
+  font-size: 14px; font-weight: 500;
+  cursor: pointer; transition: all .2s;
+}
+.btn:hover { opacity: .88; transform: translateY(-1px); }
+.btn:active { transform: translateY(0); }
+.btn-ghost {
+  background: none;
+  border: 1px solid var(--border2);
+  color: var(--text2);
+}
+.btn-ghost:hover { background: var(--bg3); color: var(--text1); }
+.btn-sm { font-size: 12px; padding: 6px 12px; border-radius: 6px; }
+
+/* ───── Progress / timers ───── */
+.timer-ring-wrap { position: relative; display: inline-flex; align-items: center; justify-content: center; }
+.timer-ring-wrap svg { transform: rotate(-90deg); }
+.timer-text {
+  position: absolute; font-size: 22px; font-weight: 300;
+  font-family: var(--mono); color: var(--accent);
+}
+
+/* ───── Animation figure ───── */
+.figure-wrap {
+  display: flex; justify-content: center; margin: 16px 0;
+}
+.motion-svg { width: 100%; max-width: 320px; height: auto; }
+
+
+/* ───── Player controls ───── */
+.player-controls {
+  display: flex; align-items: center; gap: 10px;
+  flex-wrap: wrap; margin-top: 14px;
+}
+.prog-wrap {
+  width: 100%; height: 4px; background: var(--bg3);
+  border-radius: 2px; cursor: pointer; margin: 10px 0;
+}
+.prog-bar { height: 4px; background: var(--accent); border-radius: 2px; transition: width .5s; }
+.time-label { font-family: var(--mono); font-size: 11px; color: var(--text3); }
+
+/* ───── Segment selector ───── */
+.seg-grid { display: grid; grid-template-columns: repeat(auto-fill, minmax(160px, 1fr)); gap: 10px; margin-bottom: 16px; }
+.seg-btn {
+  background: var(--bg2); border: 1px solid var(--border);
+  border-radius: var(--r); padding: 14px;
+  cursor: pointer; transition: all .2s;
+  text-align: left;
+}
+.seg-btn:hover { border-color: var(--border2); background: var(--bg3); }
+.seg-btn.active { border-color: var(--accent); background: rgba(58,157,212,0.08); }
+.seg-btn .seg-icon { font-size: 20px; margin-bottom: 6px; }
+.seg-btn .seg-name { font-size: 13px; font-weight: 500; color: var(--text1); }
+.seg-btn .seg-dur { font-size: 11px; color: var(--text3); margin-top: 2px; font-family: var(--mono); }
+
+/* ───── Upload zone ───── */
+
+/* ───── Sleep diary ───── */
+.diary-grid { display: grid; gap: 12px; }
+.form-row { display: grid; grid-template-columns: 1fr 1fr; gap: 10px; }
+label { font-size: 12px; color: var(--text3); display: block; margin-bottom: 5px; font-weight: 500; letter-spacing: .03em; }
+input[type=number], input[type=time], input[type=text], select, textarea {
+  width: 100%; background: var(--bg2);
+  border: 1px solid var(--border); border-radius: 7px;
+  color: var(--text1); font-family: var(--font); font-size: 14px;
+  padding: 9px 12px; outline: none; transition: border .2s;
+}
+input:focus, select:focus, textarea:focus { border-color: var(--accent); }
+select option { background: var(--bg2); }
+textarea { resize: vertical; min-height: 60px; }
+
+.quality-bar { display: flex; gap: 6px; margin-top: 4px; }
+.q-btn {
+  flex: 1; padding: 8px 4px; background: var(--bg2);
+  border: 1px solid var(--border); border-radius: 6px;
+  color: var(--text2); font-size: 12px; cursor: pointer;
+  transition: all .2s; text-align: center; font-family: var(--font);
+}
+.q-btn:hover { border-color: var(--border2); }
+.q-btn.active { background: rgba(58,157,212,0.15); border-color: var(--accent); color: var(--accent); }
+
+/* ───── Chart ───── */
+.chart-wrap { width: 100%; overflow-x: auto; }
+canvas { display: block; }
+
+/* ───── Stats row ───── */
+.stats-row { display: grid; grid-template-columns: repeat(3, 1fr); gap: 10px; margin-bottom: 16px; }
+.stat-card {
+  background: var(--bg2); border: 1px solid var(--border);
+  border-radius: var(--r); padding: 14px;
+}
+.stat-val { font-size: 22px; font-weight: 300; font-family: var(--mono); color: var(--text1); }
+.stat-label { font-size: 11px; color: var(--text3); margin-top: 3px; }
+
+/* ───── Toast ───── */
+#toast {
+  position: fixed; bottom: 24px; left: 50%; transform: translateX(-50%) translateY(8px);
+  background: var(--bg3); border: 1px solid var(--border2);
+  border-radius: 8px; padding: 10px 18px; font-size: 13px;
+  color: var(--text2); opacity: 0; transition: all .3s; pointer-events: none; z-index: 999;
+}
+#toast.show { opacity: 1; transform: translateX(-50%) translateY(0); }
+
+/* ───── Motion demo intro ───── */
+.motion-card {
+  background: var(--bg1); border: 1px solid var(--border);
+  border-radius: var(--r2); overflow: hidden; cursor: pointer;
+  transition: border .2s; margin-bottom: 10px;
+}
+.motion-card:hover { border-color: var(--border2); }
+.motion-card-header {
+  display: flex; align-items: center; gap: 12px;
+  padding: 14px 18px; border-bottom: 1px solid var(--border);
+}
+.motion-card-body { padding: 0 18px 18px; display: none; }
+.motion-card.open .motion-card-body { display: block; }
+.motion-badge {
+  background: rgba(58,157,212,0.12); border: 1px solid rgba(58,157,212,0.25);
+  border-radius: 20px; padding: 3px 10px; font-size: 11px; color: var(--accent);
+  font-weight: 500; margin-left: auto;
+}
+.motion-title { font-size: 14px; font-weight: 500; }
+.motion-desc { font-size: 13px; color: var(--text2); line-height: 1.6; margin: 12px 0; }
+
+
+/* ───── History table ───── */
+.hist-table { width: 100%; font-size: 12px; border-collapse: collapse; }
+.hist-table th { color: var(--text3); font-weight: 500; text-align: left; padding: 6px 8px; border-bottom: 1px solid var(--border); }
+.hist-table td { padding: 7px 8px; border-bottom: 1px solid var(--border); color: var(--text2); }
+.hist-table tr:last-child td { border-bottom: none; }
+
+/* ───── Responsive ───── */
+@media (max-width: 480px) {
+  .form-row { grid-template-columns: 1fr; }
+  .stats-row { grid-template-columns: repeat(2, 1fr); }
+}
+
+/* ───── Warning banner ───── */
+.warn-banner {
+  background: rgba(224,126,80,0.1); border: 1px solid rgba(224,126,80,0.3);
+  border-radius: var(--r); padding: 12px 16px; font-size: 13px;
+  color: var(--warm); line-height: 1.6; margin-bottom: 16px;
+}
+
+/* ───── Onboarding modal ───── */
+#onboarding-overlay {
+  position: fixed; inset: 0; z-index: 200;
+  background: rgba(7,17,31,0.97);
+  display: flex; align-items: center; justify-content: center;
+  padding: 20px;
+}
+#onboarding-overlay.hidden { display: none; }
+.onboard-box {
+  background: var(--bg1); border: 1px solid var(--border2);
+  border-radius: var(--r2); padding: 28px 24px;
+  max-width: 440px; width: 100%;
+}
+.onboard-box h2 { font-size: 18px; font-weight: 500; margin-bottom: 6px; }
+.onboard-box p  { font-size: 13px; color: var(--text2); line-height: 1.7; margin-bottom: 14px; }
+.kvkk-box {
+  background: var(--bg2); border: 1px solid var(--border);
+  border-radius: var(--r); padding: 14px;
+  font-size: 12px; color: var(--text3); line-height: 1.7;
+  max-height: 160px; overflow-y: auto; margin-bottom: 16px;
+}
+.consent-row {
+  display: flex; align-items: flex-start; gap: 10px;
+  margin-bottom: 14px; font-size: 13px; color: var(--text2); cursor: pointer;
+}
+.consent-row input[type=checkbox] { margin-top: 3px; flex-shrink: 0; accent-color: var(--accent); }
+.code-row { display: flex; gap: 8px; margin-bottom: 6px; }
+.code-row input { flex: 1; }
+.code-hint { font-size: 11px; color: var(--text3); margin-bottom: 20px; }
+
+/* ───── Time picker ───── */
+.time-picker {
+  display: flex; gap: 4px; align-items: center;
+}
+.time-picker select {
+  flex: 1; padding: 9px 6px; text-align: center;
+  -webkit-appearance: none; appearance: none;
+  background: var(--bg2); border: 1px solid var(--border);
+  border-radius: 7px; color: var(--text1);
+  font-family: var(--mono); font-size: 15px; cursor: pointer;
+}
+.time-picker select:focus { border-color: var(--accent); outline: none; }
+.time-picker .tp-sep { color: var(--text3); font-size: 18px; font-weight: 300; flex-shrink: 0; }
+.time-picker .tp-period { font-family: var(--font); font-size: 13px; min-width: 80px; }
+
+/* ───── Hint button & tooltip ───── */
+.field-label-row {
+  display: flex; align-items: center; gap: 6px; margin-bottom: 5px;
+}
+.field-label-row label { margin-bottom: 0; }
+.hint-btn {
+  width: 18px; height: 18px; border-radius: 50%;
+  background: var(--bg3); border: 1px solid var(--border2);
+  color: var(--text3); font-size: 10px; font-weight: 600;
+  cursor: pointer; flex-shrink: 0; line-height: 1;
+  display: inline-flex; align-items: center; justify-content: center;
+  transition: all .2s; font-family: var(--font);
+}
+.hint-btn:hover { background: var(--accent); border-color: var(--accent); color: #fff; }
+.hint-box {
+  background: var(--bg2); border: 1px solid var(--border2);
+  border-left: 3px solid var(--accent);
+  border-radius: var(--r); padding: 10px 14px;
+  font-size: 12px; color: var(--text2); line-height: 1.7;
+  margin-top: 6px; display: none;
+}
+.hint-box.open { display: block; }
+
+/* ───── Diary intro card ───── */
+.diary-intro {
+  background: var(--bg2); border: 1px solid var(--border);
+  border-radius: var(--r); padding: 14px 16px;
+  font-size: 13px; color: var(--text2); line-height: 1.8;
+  margin-bottom: 14px;
+}
+.diary-intro strong { color: var(--text1); }
+
+/* ───── Weekly share banner ───── */
+#share-banner {
+  background: linear-gradient(135deg, rgba(95,196,160,0.12), rgba(58,157,212,0.08));
+  border: 1px solid rgba(95,196,160,0.3);
+  border-radius: var(--r2); padding: 18px 20px;
+  margin: 0 0 14px; display: none;
+}
+#share-banner.visible { display: block; }
+.share-banner-title { font-size: 15px; font-weight: 500; color: var(--accent2); margin-bottom: 4px; }
+.share-banner-sub { font-size: 13px; color: var(--text2); margin-bottom: 14px; line-height: 1.6; }
+
+/* ───── Phase pill ───── */
+.phase-pill {
+  display: inline-flex; align-items: center; gap: 6px;
+  background: var(--bg2); border: 1px solid var(--border);
+  border-radius: 20px; padding: 4px 12px;
+  font-size: 11px; color: var(--text3); font-family: var(--mono);
+  margin-bottom: 16px;
+}
+.phase-dot { width: 6px; height: 6px; border-radius: 50%; background: var(--accent); }
+
+/* ─── scrollbar ─── */
+::-webkit-scrollbar { width: 6px; height: 6px; }
+::-webkit-scrollbar-track { background: var(--bg0); }
+::-webkit-scrollbar-thumb { background: var(--bg3); border-radius: 3px; }
+</style>
+</head>
+<body>
+
+<!-- ════ ONBOARDING MODAL ════ -->
+<div id="onboarding-overlay">
+  <div class="onboard-box">
+    <h2>Hoş geldiniz</h2>
+    <p>Bu uygulama gevşeme egzersizlerinizi yönetmenize ve uyku kalitenizi takip etmenize yardımcı olur.</p>
+
+    <div class="kvkk-box">
+      <strong style="color:var(--text2)">Aydınlatma Metni (KVKK)</strong><br><br>
+      Bu uygulama aracılığıyla toplanan uyku günlüğü ve egzersiz verileri; yalnızca Balıkesir Üniversitesi bünyesinde yürütülen araştırma kapsamında, Dr. Fzt. Utku Berberoğlu sorumluluğunda işlenmektedir. Veriler üçüncü taraflarla paylaşılmaz. Katılım tamamen gönüllülük esasına dayalıdır; istediğiniz zaman vazgeçebilirsiniz. Cihazınızdaki tüm verileri "Günlük → JSON İndir" ile kendiniz indirebilirsiniz. Araştırmaya katılmayı seçmezseniz uygulama yalnızca yerel olarak çalışır, hiçbir veri dışarı gönderilmez.
+    </div>
+
+    <label class="consent-row" id="consent-label">
+      <input type="checkbox" id="consent-check" onchange="onConsentChange()">
+      <span>Aydınlatma metnini okudum, verilerimin araştırma amacıyla işlenmesine <strong>gönüllü olarak</strong> onay veriyorum.</span>
+    </label>
+
+    <div id="code-section" style="display:none">
+      <div class="code-row">
+        <input type="text" id="participant-code-input" placeholder="Katılımcı kodu (örn: BAL-042)"
+          maxlength="20" oninput="this.value=this.value.toUpperCase()">
+      </div>
+      <div class="code-hint" style="margin-bottom:12px">Araştırmacı tarafından verilen kodu girin. Kodunuz yoksa boş bırakın.</div>
+      <label style="display:block;margin-bottom:5px">Çalışmaya başlangıç tarihi</label>
+      <input type="date" id="study-start-input" style="margin-bottom:6px">
+      <div class="code-hint">Bugün başlıyorsanız bugünün tarihini seçin.</div>
+    </div>
+
+    <div style="display:flex;gap:10px">
+      <button class="btn" id="onboard-confirm-btn" onclick="confirmOnboarding()" disabled
+        style="flex:1;opacity:.4;cursor:not-allowed">Başla</button>
+      <button class="btn btn-ghost" onclick="skipOnboarding()" style="font-size:13px">Katılmadan devam et</button>
+    </div>
+  </div>
+</div>
+
+<header id="app-header">
+  <span class="app-header-logo">◎</span>
+  <span class="app-header-title">Duy ve Gevşe</span>
+  <span class="app-header-phase" id="header-phase-pill"></span>
+</header>
+
+<nav>
+  <button class="nav-btn active" data-icon="◈" onclick="goto('home')">Ön Hazırlık</button>
+  <button class="nav-btn" data-icon="▶" onclick="goto('guide')">Sesli Rehber</button>
+  <button class="nav-btn" data-icon="◻" onclick="goto('diary')">Günlük</button>
+  <button class="nav-btn" data-icon="◫" onclick="goto('stats')">Grafik</button>
+  <button class="nav-btn" data-icon="◌" onclick="goto('about')">Hakkında</button>
+</nav>
+
+<!-- ════════════════════════════════ HOME / HAREKET ════════════════════════════════ -->
+<div id="page-home" class="page active">
+
+  <div style="margin-bottom:24px">
+    <div class="section-title">Hazırlık</div>
+    <h2>Hareketleri Tanıyalım</h2>
+    <p class="subtitle">Sesli rehbere başlamadan önce her bölge için yapacağınız hareketi bir kez görmek, egzersizi daha etkili yapmanızı sağlar.</p>
+
+    <div class="warn-banner">
+      ⚠ <strong>Dikkat:</strong> Hareketleri çok zorlu yapmaya çalışırsanız, istemeden diğer vücut bölgelerini de sıkabilirsiniz. Hareketi net ve kuvvetli yapın ama kendinizi çok zorlamayın.
+    </div>
+  </div>
+
+  <!-- Omuz öne -->
+  <div class="motion-card" id="mc-1" onclick="toggleMotionCard('mc-1')">
+    <div class="motion-card-header">
+      <div>
+        <div class="motion-title">Omuzların Öne Gitmesi</div>
+        <div style="font-size:11px;color:var(--text3);margin-top:2px">Omuz başları yatağa yakın → gevşek</div>
+      </div>
+      <span class="motion-badge">Omuz</span>
+    </div>
+    <div class="motion-card-body">
+      <p class="motion-desc">Omuzları tavana doğru itin → derin nefes alın → nefes verirken yatağa bastırın → bırakın.</p>
+      <div class="figure-wrap">
+        <div class="motion-svg" style="display:flex;align-items:center;justify-content:center;background:var(--bg2);border:1px dashed var(--border);border-radius:8px;color:var(--text3);font-size:13px;font-family:var(--mono)">[ Omuz Öne — görsel buraya gelecek ]</div>
+      </div>
+    </div>
+  </div>
+
+  <!-- Omuz yukarı -->
+  <div class="motion-card" id="mc-2" onclick="toggleMotionCard('mc-2')">
+    <div class="motion-card-header">
+      <div>
+        <div class="motion-title">Omuzların Yukarı Çekilmesi</div>
+        <div style="font-size:11px;color:var(--text3);margin-top:2px">Kulaktan uzakta → gevşek boyn</div>
+      </div>
+      <span class="motion-badge">Omuz</span>
+    </div>
+    <div class="motion-card-body">
+      <p class="motion-desc">Omuzları kulaklara doğru çekin → nefes alın → nefes verirken ayaklara doğru itin → bırakın.</p>
+      <div class="figure-wrap">
+        <div class="motion-svg" style="display:flex;align-items:center;justify-content:center;background:var(--bg2);border:1px dashed var(--border);border-radius:8px;color:var(--text3);font-size:13px;font-family:var(--mono)">[ Omuz Yukarı — görsel buraya gelecek ]</div>
+      </div>
+    </div>
+  </div>
+
+  <!-- Göğüs kafesi -->
+  <div class="motion-card" id="mc-3" onclick="toggleMotionCard('mc-3')">
+    <div class="motion-card-header">
+      <div>
+        <div class="motion-title">Göğüs Kafesini Açmak</div>
+        <div style="font-size:11px;color:var(--text3);margin-top:2px">Eller başın arkasında, dirsekler yatağa</div>
+      </div>
+      <span class="motion-badge">Göğüs</span>
+    </div>
+    <div class="motion-card-body">
+      <p class="motion-desc">Elleri başın arkasına koyun. Dirsekleri tavana itin → nefes alın → nefes verirken yatağa bastırın → bırakın.</p>
+      <div class="figure-wrap">
+        <div class="motion-svg" style="display:flex;align-items:center;justify-content:center;background:var(--bg2);border:1px dashed var(--border);border-radius:8px;color:var(--text3);font-size:13px;font-family:var(--mono)">[ Göğüs Kafesi — görsel buraya gelecek ]</div>
+      </div>
+    </div>
+  </div>
+
+  <!-- Kalça -->
+  <div class="motion-card" id="mc-4" onclick="toggleMotionCard('mc-4')">
+    <div class="motion-card-header">
+      <div>
+        <div class="motion-title">Kalçaların Gevşetilmesi</div>
+        <div style="font-size:11px;color:var(--text3);margin-top:2px">Ayak parmakları dışa → kalça gevşek</div>
+      </div>
+      <span class="motion-badge">Kalça</span>
+    </div>
+    <div class="motion-card-body">
+      <p class="motion-desc">Bacakları içe çevirin → nefes alın → nefes verirken dışa yanlara doğru çevirin → bırakın.</p>
+      <div class="figure-wrap">
+        <div class="motion-svg" style="display:flex;align-items:center;justify-content:center;background:var(--bg2);border:1px dashed var(--border);border-radius:8px;color:var(--text3);font-size:13px;font-family:var(--mono)">[ Kalça — görsel buraya gelecek ]</div>
+      </div>
+    </div>
+  </div>
+
+  <!-- Bacaklar -->
+  <div class="motion-card" id="mc-5" onclick="toggleMotionCard('mc-5')">
+    <div class="motion-card-header">
+      <div>
+        <div class="motion-title">Bacakların Gevşetilmesi</div>
+        <div style="font-size:11px;color:var(--text3);margin-top:2px">Ayak parmakları aşağı → kaslar gevşek</div>
+      </div>
+      <span class="motion-badge">Bacak</span>
+    </div>
+    <div class="motion-card-body">
+      <p class="motion-desc">Ayakları kendinize doğru çekin (gaz pedalının tersi) → nefes alın → nefes verirken öne itin → bırakın.</p>
+      <div class="figure-wrap">
+        <div class="motion-svg" style="display:flex;align-items:center;justify-content:center;background:var(--bg2);border:1px dashed var(--border);border-radius:8px;color:var(--text3);font-size:13px;font-family:var(--mono)">[ Bacak — görsel buraya gelecek ]</div>
+      </div>
+    </div>
+  </div>
+
+  <!-- Boyun -->
+  <div class="motion-card" id="mc-6" onclick="toggleMotionCard('mc-6')">
+    <div class="motion-card-header">
+      <div>
+        <div class="motion-title">Boyun — Kraniyo-servikal Fleksiyon</div>
+        <div style="font-size:11px;color:var(--text3);margin-top:2px">Baş yastığı bastır → küçük evet hareketi</div>
+      </div>
+      <span class="motion-badge">Boyun</span>
+    </div>
+    <div class="motion-card-body">
+      <p class="motion-desc">Baş boyun bükme: dış boyun kaslarını kasmadan, başın arkasını yastıkta yukarı kaydırarak küçük bir "evet" hareketi yapın. Çene göğse yaklaşır.</p>
+      <div class="figure-wrap">
+        <div class="motion-svg" style="display:flex;align-items:center;justify-content:center;background:var(--bg2);border:1px dashed var(--border);border-radius:8px;color:var(--text3);font-size:13px;font-family:var(--mono)">[ Boyun/KSF — görsel buraya gelecek ]</div>
+      </div>
+    </div>
+  </div>
+
+  <!-- Çene -->
+  <div class="motion-card" id="mc-7" onclick="toggleMotionCard('mc-7')">
+    <div class="motion-card-header">
+      <div>
+        <div class="motion-title">Çeneyi Rahatlatmak</div>
+        <div style="font-size:11px;color:var(--text3);margin-top:2px">Dişler hafif aralık → çene gevşek</div>
+      </div>
+      <span class="motion-badge">Çene</span>
+    </div>
+    <div class="motion-card-body">
+      <p class="motion-desc">Dişleri değdirin → nefes alın → nefes verirken ağzı açmadan alt çeneyi aşağı çektirin → bırakın. Dişler birbirine değmez, hafif aralık.</p>
+      <div class="figure-wrap">
+        <div class="motion-svg" style="display:flex;align-items:center;justify-content:center;background:var(--bg2);border:1px dashed var(--border);border-radius:8px;color:var(--text3);font-size:13px;font-family:var(--mono)">[ Çene — görsel buraya gelecek ]</div>
+      </div>
+    </div>
+  </div>
+
+  <div style="margin-top:20px;padding:16px;background:var(--bg2);border-radius:var(--r);border:1px solid var(--border);font-size:13px;color:var(--text2);line-height:1.7">
+    <strong style="color:var(--text1)">Hazır olduğunuzda</strong><br>
+    Tüm hareketleri gördükten sonra <em>Oynatıcı</em> sekmesine geçerek sesli rehberinizi yükleyip başlatabilirsiniz.
+  </div>
+
+</div>
+
+<!-- ════════════════════════════════ GUIDE / OYNATICI ════════════════════════════════ -->
+<div id="page-guide" class="page">
+
+  <div style="margin-bottom:20px">
+    <div class="section-title">Sesli Rehber</div>
+    <h2>Gevşeme Oynatıcısı</h2>
+    <p class="subtitle">Ses kaydınızı yükleyin, bölüm seçin ve başlatın. Yönerge metni kaydın ilerleyişiyle paralel gösterilir.</p>
+  </div>
+
+  <!-- Segment selector — dinamik, ses/manifest.json'dan yüklenir -->
+  <div class="seg-grid" id="seg-grid">
+    <!-- Yükleniyor... -->
+  </div>
+
+  <audio id="main-audio" style="display:none" ontimeupdate="onTimeUpdate()" onended="onAudioEnd()"></audio>
+
+  <!-- Player -->
+  <div class="card" id="player-card">
+    <div style="display:flex;align-items:center;gap:14px;margin-bottom:14px">
+      <div class="timer-ring-wrap">
+        <svg width="72" height="72">
+          <circle cx="36" cy="36" r="28" fill="none" stroke="var(--bg3)" stroke-width="4"/>
+          <circle id="timer-ring" cx="36" cy="36" r="28" fill="none" stroke="var(--accent)" stroke-width="4"
+            stroke-dasharray="175.9" stroke-dashoffset="175.9" stroke-linecap="round" transform="rotate(-90 36 36)"/>
+        </svg>
+        <span class="timer-text" id="timer-display">0:00</span>
+      </div>
+    </div>
+
+    <div class="prog-wrap" onclick="seekAudio(event)" id="prog-wrap">
+      <div class="prog-bar" id="prog-bar" style="width:0%"></div>
+    </div>
+    <div style="display:flex;justify-content:space-between">
+      <span class="time-label" id="time-current">0:00</span>
+      <span class="time-label" id="time-total">0:00</span>
+    </div>
+
+    <div class="player-controls">
+      <button class="btn btn-ghost btn-sm" onclick="skip(-10)">-10s</button>
+      <button class="btn" id="play-btn" onclick="togglePlay()" style="font-size:18px;width:52px;text-align:center">▶</button>
+      <button class="btn btn-ghost btn-sm" onclick="skip(10)">+10s</button>
+    </div>
+  </div>
+
+  <!-- Exercise session log -->
+  <div class="card" id="exercise-log-card" style="margin-top:8px">
+    <div style="display:flex;align-items:center;justify-content:space-between;margin-bottom:10px">
+      <div class="section-title" style="margin-bottom:0">Bugünün Egzersiz Kaydı</div>
+      <div id="exercise-status-badge" style="font-size:11px;padding:3px 10px;border-radius:20px;background:var(--bg3);color:var(--text3)">Başlanmadı</div>
+    </div>
+    <div id="exercise-log-rows" style="font-size:12px;color:var(--text3)">
+      Oynatıcıyı başlatınca kayıt otomatik tutulur.
+    </div>
+  </div>
+
+</div>
+
+<!-- ════════════════════════════════ DIARY ════════════════════════════════ -->
+<div id="page-diary" class="page">
+
+  <div style="margin-bottom:20px">
+    <div class="section-title">Consensus Sleep Diary</div>
+    <h2>Uyku Günlüğü</h2>
+    <p class="subtitle">Her sabah uyandıktan sonra, tercihen 20 dakika içinde doldurun. Verileriniz yalnızca bu cihazda saklanır.</p>
+  </div>
+
+  <form id="diary-form" onsubmit="saveDiary(event)">
+
+    <div class="diary-intro">
+      Bu günlük <strong>sabah uyandıktan hemen sonra</strong>, tercihen 20 dakika içinde doldurulmalıdır.<br>
+      <strong>"Yatak"</strong> uyuduğunuz yeri, <strong>"gün"</strong> yatma saatinden kalkma saatine kadar olan süreyi ifade eder.
+      Olağandışı bir gece geçirdiyseniz bunu notlar alanına yazın.
+    </div>
+
+    <div class="card diary-grid">
+
+      <div>
+        <label>Tarih (bu sabah)</label>
+        <input type="text" id="d-date" readonly>
+      </div>
+
+      <div class="form-row">
+        <div>
+          <div class="field-label-row">
+            <label>Yatağa girme saati</label>
+            <button type="button" class="hint-btn" onclick="toggleHint('h-bed')">i</button>
+          </div>
+          <div class="time-picker" id="tp-bed"></div>
+          <input type="hidden" id="d-bed">
+          <div class="hint-box" id="h-bed">Işığı söndürüp uyumaya hazırlandığınız saat. Telefona baktıysanız o an değil, gerçekten uzanıp uyumaya niyetlendiğiniz an.</div>
+        </div>
+        <div>
+          <div class="field-label-row">
+            <label>Uyumaya çalışmaya başlama saati</label>
+            <button type="button" class="hint-btn" onclick="toggleHint('h-try')">i</button>
+          </div>
+          <div class="time-picker" id="tp-try"></div>
+          <input type="hidden" id="d-try">
+          <div class="hint-box" id="h-try">Gözlerinizi kapatıp uyumaya aktif olarak çalışmaya başladığınız an. Yatağa girmekten biraz sonra olabilir.</div>
+        </div>
+      </div>
+
+      <div>
+        <div class="field-label-row">
+          <label>Uykuya dalmak kaç dakika aldı?</label>
+          <button type="button" class="hint-btn" onclick="toggleHint('h-sol')">i</button>
+        </div>
+        <input type="number" id="d-sol" min="0" max="240" placeholder="dakika">
+        <div class="hint-box" id="h-sol">Uyumaya çalışmaya başladığınız andan ilk kez uyuduğunuzu hissettiğiniz ana kadar geçen süre. Tam bilmek zorunda değilsiniz — en iyi tahmininiz yeterli.</div>
+      </div>
+
+      <div class="form-row">
+        <div>
+          <div class="field-label-row">
+            <label>Gece kaç kez uyandınız?</label>
+            <button type="button" class="hint-btn" onclick="toggleHint('h-nwak')">i</button>
+          </div>
+          <input type="number" id="d-nwak" min="0" max="30" placeholder="sayı">
+          <div class="hint-box" id="h-nwak">İlk uyuduktan sonra, sabah final uyanışınızdan önce kaç kez uyandığınızı sayın. Kısa uyanışları da dahil edin.</div>
+        </div>
+        <div>
+          <div class="field-label-row">
+            <label>Bu uyanışlar toplam kaç dakika sürdü?</label>
+            <button type="button" class="hint-btn" onclick="toggleHint('h-waso')">i</button>
+          </div>
+          <input type="number" id="d-waso" min="0" max="480" placeholder="dakika">
+          <div class="hint-box" id="h-waso">Gece uyandığınızda tekrar uyuyamadan geçirdiğiniz toplam süre — tüm uyanışlar toplanır. Tuvalete kalktıysanız o süreyi de ekleyin.</div>
+        </div>
+      </div>
+
+      <div class="form-row">
+        <div>
+          <div class="field-label-row">
+            <label>Son kez uyandığınız saat</label>
+            <button type="button" class="hint-btn" onclick="toggleHint('h-wake')">i</button>
+          </div>
+          <div class="time-picker" id="tp-wake"></div>
+          <input type="hidden" id="d-wake">
+          <div class="hint-box" id="h-wake">Sabah artık uyumadığınız son uyanışın saati. Kısa bir uyanıktan sonra tekrar uyuduysanız onu saymayın.</div>
+        </div>
+        <div>
+          <div class="field-label-row">
+            <label>Yataktan kalktığınız saat</label>
+            <button type="button" class="hint-btn" onclick="toggleHint('h-out')">i</button>
+          </div>
+          <div class="time-picker" id="tp-out"></div>
+          <input type="hidden" id="d-out">
+          <div class="hint-box" id="h-out">Yatağı terk edip güne başladığınız saat. Uyandıktan sonra yatakta beklediğiniz süre varsa bu saat daha geç olabilir.</div>
+        </div>
+      </div>
+
+      <div>
+        <div class="field-label-row">
+          <label>Toplam uyku süresi — saat (kendi tahmininiz)</label>
+          <button type="button" class="hint-btn" onclick="toggleHint('h-tst')">i</button>
+        </div>
+        <input type="number" id="d-tst" min="0" max="16" step="0.5" placeholder="örn: 6.5">
+        <div class="hint-box" id="h-tst">Gerçekten uyuduğunuzu düşündüğünüz toplam süre. Yatakta geçirdiğiniz süre değil — gece uyanışlarını ve uykuya dalamadığınız zamanı çıkarın. 6 saat 30 dk için 6.5 yazın.</div>
+      </div>
+
+      <div>
+        <div class="field-label-row">
+          <label>Uyku kaliteniz</label>
+          <button type="button" class="hint-btn" onclick="toggleHint('h-quality')">i</button>
+        </div>
+        <div class="hint-box" id="h-quality" style="margin-bottom:8px">Saat sayısından bağımsız olarak bu geceki uykunuzu genel olarak nasıl değerlendirirsiniz? Dinlenmiş hissedip hissetmediğinizi de göz önünde bulundurun.</div>
+        <div class="quality-bar">
+          <button type="button" class="q-btn" onclick="setQ(1)" id="q1">1<br><span style="font-size:10px">Çok kötü</span></button>
+          <button type="button" class="q-btn" onclick="setQ(2)" id="q2">2<br><span style="font-size:10px">Kötü</span></button>
+          <button type="button" class="q-btn" onclick="setQ(3)" id="q3">3<br><span style="font-size:10px">Orta</span></button>
+          <button type="button" class="q-btn" onclick="setQ(4)" id="q4">4<br><span style="font-size:10px">İyi</span></button>
+          <button type="button" class="q-btn" onclick="setQ(5)" id="q5">5<br><span style="font-size:10px">Çok iyi</span></button>
+        </div>
+      </div>
+
+      <div>
+        <label>Gevşeme egzersizi (otomatik)</label>
+        <div id="d-relax-display" style="background:var(--bg2);border:1px solid var(--border);border-radius:7px;padding:9px 12px;font-size:13px;color:var(--text3);min-height:38px">
+          Bugün henüz egzersiz kaydı yok
+        </div>
+        <input type="hidden" id="d-relax">
+      </div>
+
+      <div>
+        <div class="field-label-row">
+          <label>İlaç / alkol / kafein? (isteğe bağlı)</label>
+          <button type="button" class="hint-btn" onclick="toggleHint('h-meds')">i</button>
+        </div>
+        <input type="text" id="d-meds" placeholder="Örn: kahve 15:00, uyku ilacı">
+        <div class="hint-box" id="h-meds">Uykunuzu etkileyebilecek maddeler: uyku ilacı, ağrı kesici, alkol, kafein (kahve, çay, enerji içeceği). Saat ve miktarı da yazabilirsiniz.</div>
+      </div>
+
+      <div>
+        <div class="field-label-row">
+          <label>Notlar (isteğe bağlı)</label>
+          <button type="button" class="hint-btn" onclick="toggleHint('h-notes')">i</button>
+        </div>
+        <textarea id="d-notes" placeholder="Rüya, stres, gürültü, hastalık…"></textarea>
+        <div class="hint-box" id="h-notes">Uykunuzu olağandışı etkileyen her şey: gürültü, stres, hastalık, yolculuk, normalden farklı egzersiz. Araştırmacının veriyi yorumlamasına yardımcı olur.</div>
+      </div>
+
+    </div>
+
+    <div style="display:flex;gap:10px;margin-top:14px">
+      <button type="submit" class="btn">Kaydet</button>
+      <button type="button" class="btn btn-ghost" onclick="clearForm()">Temizle</button>
+    </div>
+  </form>
+
+  <!-- History -->
+  <div style="margin-top:28px">
+    <div style="display:flex;align-items:center;justify-content:space-between;flex-wrap:wrap;gap:8px;margin-bottom:12px">
+      <div class="section-title" style="margin-bottom:0">Son Kayıtlar</div>
+      <div style="display:flex;gap:8px;flex-wrap:wrap">
+        <button class="btn btn-ghost btn-sm" onclick="exportCSV()">CSV İndir</button>
+        <button class="btn btn-ghost btn-sm" onclick="exportJSON()">JSON İndir</button>
+        <label class="btn btn-ghost btn-sm" style="cursor:pointer">
+          JSON Yükle <input type="file" accept=".json" onchange="importJSON(event)" style="display:none">
+        </label>
+      </div>
+    </div>
+    <div class="card" style="overflow-x:auto">
+      <table class="hist-table" id="hist-table">
+        <thead>
+          <tr>
+            <th>Tarih</th><th>Yatış</th><th>Uyku (s)</th><th>Uyanış</th><th>Kalite</th><th>Egzersiz</th><th></th>
+          </tr>
+        </thead>
+        <tbody id="hist-body"></tbody>
+      </table>
+    </div>
+  </div>
+
+</div>
+
+<!-- ════════════════════════════════ STATS ════════════════════════════════ -->
+<div id="page-stats" class="page">
+
+  <div style="margin-bottom:16px">
+    <div class="section-title">Veri & Paylaşım</div>
+    <h2>Uyku Grafikleri</h2>
+  </div>
+
+  <!-- Phase pill -->
+  <div class="phase-pill" id="phase-pill">
+    <div class="phase-dot"></div>
+    <span id="phase-label">—</span>
+    <span id="phase-days" style="color:var(--text3)"></span>
+  </div>
+
+  <!-- Weekly share banner (Pazar günleri veya dönem sonu) -->
+  <div id="share-banner">
+    <div class="share-banner-title" id="share-banner-title">Bu haftanın verilerini paylaşın</div>
+    <div class="share-banner-sub" id="share-banner-sub">Araştırmacıya göndermek için aşağıdaki butona basın. Tüm veriler tek dosya olarak iletilir.</div>
+    <div style="display:flex;gap:10px;flex-wrap:wrap">
+      <button class="btn" onclick="shareData('week')" id="share-week-btn">
+        Paylaş
+      </button>
+      <button class="btn btn-ghost btn-sm" onclick="dismissBanner()">Sonra</button>
+    </div>
+  </div>
+
+  <div class="stats-row" id="stats-row">
+    <div class="stat-card">
+      <div class="stat-val" id="s-avg-tst">—</div>
+      <div class="stat-label">Ort. uyku süresi</div>
+    </div>
+    <div class="stat-card">
+      <div class="stat-val" id="s-avg-q">—</div>
+      <div class="stat-label">Ort. kalite</div>
+    </div>
+    <div class="stat-card">
+      <div class="stat-val" id="s-entries">0</div>
+      <div class="stat-label">Toplam kayıt</div>
+    </div>
+  </div>
+
+  <div class="card" style="margin-bottom:12px">
+    <div class="section-title" style="margin-bottom:12px">Uyku Kalitesi — Son 30 Gün</div>
+    <div class="chart-wrap"><canvas id="chart-quality" height="160"></canvas></div>
+  </div>
+
+  <div class="card" style="margin-bottom:12px">
+    <div class="section-title" style="margin-bottom:12px">Toplam Uyku Süresi (saat)</div>
+    <div class="chart-wrap"><canvas id="chart-tst" height="160"></canvas></div>
+  </div>
+
+  <div class="card" style="margin-bottom:12px">
+    <div class="section-title" style="margin-bottom:12px">Gece Uyanış Sayısı</div>
+    <div class="chart-wrap"><canvas id="chart-nwak" height="160"></canvas></div>
+  </div>
+
+  <!-- Manuel paylaşım -->
+  <div class="card">
+    <div class="section-title" style="margin-bottom:10px">Veriyi Paylaş</div>
+    <p style="font-size:13px;color:var(--text2);line-height:1.6;margin-bottom:14px">
+      Tüm uyku günlüğü ve egzersiz verilerinizi tek seferde araştırmacıya iletebilirsiniz.
+      Telefondaki paylaşım menüsü açılır — WhatsApp, e-posta veya istediğiniz uygulama.
+    </p>
+    <div style="display:flex;gap:10px;flex-wrap:wrap">
+      <button class="btn" onclick="shareData('all')">Tüm veriyi paylaş</button>
+      <button class="btn btn-ghost" onclick="shareData('week')">Sadece bu hafta</button>
+    </div>
+  </div>
+
+  <div style="margin-top:12px;font-size:11px;color:var(--text3);text-align:center">
+    Creative Commons BY-SA · Dr. Fzt. Utku Berberoğlu · Duy ve Gevşe
+  </div>
+
+</div>
+
+<!-- ════════════════════════════════ HAKKINDA ════════════════════════════════ -->
+<div id="page-about" class="page">
+
+  <div style="margin-bottom:24px">
+    <div class="section-title">Hakkında</div>
+    <h2>Duy ve Gevşe Uygulaması</h2>
+    <p class="subtitle">Kaydı dinleyin, gergin duruşu fark edin, kolayca rahat duruşa geçin.</p>
+  </div>
+
+  <!-- Uygulama açıklaması -->
+  <div class="card" style="margin-bottom:12px">
+    <p style="font-size:13px;color:var(--text2);line-height:1.7;margin:0">
+      Balıkesir Üniversitesi, Sağlık Bilimleri Fakültesi, Fizyoterapi ve Rehabilitasyon Bölümü uzmanlarından gevşeme egzersizleri için sesli rehber ve uyku kalitesi izleyici.
+    </p>
+  </div>
+
+  <!-- Geliştirici -->
+  <div class="card" style="margin-bottom:12px">
+    <div class="section-title" style="margin-bottom:12px">Geliştirici</div>
+    <div style="display:flex;flex-direction:column;gap:6px">
+      <div style="font-size:15px;font-weight:600;color:var(--text1)">Dr. Öğr. Üyesi Utku Berberoğlu</div>
+      <div style="font-size:13px;color:var(--text2)">Fizyoterapi ve Rehabilitasyon Bölümü</div>
+      <div style="font-size:13px;color:var(--text2)">Sağlık Bilimleri Fakültesi</div>
+      <div style="font-size:13px;color:var(--text2)">Balıkesir Üniversitesi</div>
+    </div>
+  </div>
+
+  <!-- İletişim -->
+  <div class="card" style="margin-bottom:12px">
+    <div class="section-title" style="margin-bottom:12px">İletişim</div>
+    <p style="font-size:13px;color:var(--text2);line-height:1.7;margin-bottom:10px">
+      Uygulama hakkında soru, öneri veya geri bildirim için araştırmacıya ulaşabilirsiniz.
+    </p>
+    <a href="https://avesis.balikesir.edu.tr/utku.berberoglu" target="_blank"
+      style="display:block;font-size:13px;color:var(--accent);text-decoration:none;padding:6px 0">
+      ↗ Balıkesir Üniversitesi — Akademik Profil
+    </a>
+    <a href="https://github.com/utkb/duy-ve-gevse/issues" target="_blank"
+      style="display:block;font-size:13px;color:var(--accent);text-decoration:none;padding:6px 0">
+      ↗ GitHub — Teknik Geri Bildirim
+    </a>
+  </div>
+
+  <!-- Kullanılan kütüphaneler -->
+  <div class="card" style="margin-bottom:12px">
+    <div class="section-title" style="margin-bottom:12px">Kullanılan Bileşenler</div>
+    <div style="display:flex;flex-direction:column;gap:10px">
+
+      <div style="border-bottom:1px solid var(--border);padding-bottom:10px">
+        <div style="font-size:13px;font-weight:600;color:var(--text1);margin-bottom:2px">Chart.js 4.4.1</div>
+        <div style="font-size:12px;color:var(--text3)">Uyku grafikleri · MIT Lisansı</div>
+        <a href="https://www.chartjs.org" target="_blank" style="font-size:12px;color:var(--accent);text-decoration:none">chartjs.org ↗</a>
+      </div>
+
+      <div style="border-bottom:1px solid var(--border);padding-bottom:10px">
+        <div style="font-size:13px;font-weight:600;color:var(--text1);margin-bottom:2px">IBM Plex Sans & IBM Plex Mono</div>
+        <div style="font-size:12px;color:var(--text3)">Tipografi · SIL Open Font License 1.1</div>
+        <a href="https://fonts.google.com/specimen/IBM+Plex+Sans" target="_blank" style="font-size:12px;color:var(--accent);text-decoration:none">Google Fonts ↗</a>
+      </div>
+
+      <div>
+        <div style="font-size:13px;font-weight:600;color:var(--text1);margin-bottom:2px">Web Share API · localStorage</div>
+        <div style="font-size:12px;color:var(--text3)">Veri paylaşımı ve yerel depolama · Tarayıcı yerleşik API — lisans gerektirmez</div>
+      </div>
+
+    </div>
+  </div>
+
+  <!-- Lisans -->
+  <div class="card" style="margin-bottom:12px">
+    <div class="section-title" style="margin-bottom:12px">Lisans</div>
+
+    <div style="margin-bottom:14px">
+      <div style="font-size:13px;font-weight:600;color:var(--text1);margin-bottom:4px">Yazılım — EUPL 1.2</div>
+      <p style="font-size:12px;color:var(--text2);line-height:1.7;margin-bottom:6px">
+        Uygulamanın kaynak kodu (HTML, CSS, JavaScript, Service Worker) European Union
+        Public Licence v1.2 ile lisanslanmıştır. Kodu inceleyebilir, değiştirebilir ve
+        dağıtabilirsiniz; değiştirilmiş sürümler de aynı lisans altında kalmalıdır.
+      </p>
+      <a href="https://joinup.ec.europa.eu/collection/eupl/eupl-text-eupl-12" target="_blank"
+        style="font-size:12px;color:var(--accent);text-decoration:none">EUPL 1.2 tam metni ↗</a>
+    </div>
+
+    <div style="border-top:1px solid var(--border);padding-top:14px;margin-bottom:14px">
+      <div style="font-size:13px;font-weight:600;color:var(--text1);margin-bottom:4px">Ses kayıtları — CC BY-NC-SA 4.0</div>
+      <p style="font-size:12px;color:var(--text2);line-height:1.7;margin-bottom:6px">
+        Sesli rehber kayıtları Creative Commons Atıf-GayriTicari-AynıLisanslaPaylaş 4.0
+        Uluslararası lisansı ile sunulmaktadır. Kaynak göstererek akademik ve kişisel
+        amaçlarla paylaşabilirsiniz; ticari kullanım için yazılı izin gereklidir.
+      </p>
+      <a href="https://creativecommons.org/licenses/by-nc-sa/4.0/deed.tr" target="_blank"
+        style="font-size:12px;color:var(--accent);text-decoration:none">CC BY-NC-SA 4.0 ↗</a>
+    </div>
+
+    <div style="border-top:1px solid var(--border);padding-top:14px">
+      <div style="font-size:13px;font-weight:600;color:var(--text1);margin-bottom:4px">Görsel ve metin içerik — CC BY-SA 4.0</div>
+      <p style="font-size:12px;color:var(--text2);line-height:1.7;margin-bottom:6px">
+        Egzersiz yönergeleri, görseller, açıklamalar ve diğer metin içerikleri
+        Creative Commons Atıf-AynıLisanslaPaylaş 4.0 Uluslararası lisansı ile
+        sunulmaktadır. Kaynak göstererek paylaşabilir ve uyarlayabilirsiniz.
+      </p>
+      <a href="https://creativecommons.org/licenses/by-sa/4.0/deed.tr" target="_blank"
+        style="font-size:12px;color:var(--accent);text-decoration:none">CC BY-SA 4.0 ↗</a>
+    </div>
+  </div>
+
+  <div style="margin-top:8px;font-size:11px;color:var(--text3);text-align:center;line-height:1.8">
+    Duy ve Gevşe · Balıkesir Üniversitesi · 2026<br>
+    EUPL 1.2 (yazılım) · CC BY-NC-SA 4.0 (ses) · CC BY-SA 4.0 (içerik)<br>
+    <span style="color:var(--text3)">Uygulama Claude (Anthropic) yardımıyla geliştirilmiştir.</span>
+  </div>
+
+</div>
+
+<div id="toast"></div>
+
+<!-- ════════════════════════════════ Chart.js ════════════════════════════════ -->
+<script src="https://cdnjs.cloudflare.com/ajax/libs/Chart.js/4.4.1/chart.umd.min.js"></script>
+
+<script>
+/* ─── Navigation ─── */
+function goto(pg) {
+  // Close open exercise session when leaving player
+  if (pg !== 'guide' && currentSession) {
+    const aud = document.getElementById('main-audio');
+    if (playing) { aud.pause(); playing = false; document.getElementById('play-btn').textContent = '▶'; }
+    endSession(lastCompletePct);
+  }
+  document.querySelectorAll('.page').forEach(p => p.classList.remove('active'));
+  document.querySelectorAll('.nav-btn').forEach(b => b.classList.remove('active'));
+  document.getElementById('page-' + pg).classList.add('active');
+  const btns = document.querySelectorAll('.nav-btn');
+  const map = {home:0, guide:1, diary:2, stats:3, about:4};
+  btns[map[pg]].classList.add('active');
+  if (pg === 'stats') { renderCharts(); updatePhasePill(); checkShareBanner(); }
+  if (pg === 'diary') { renderHistory(); updateDiaryRelaxField(); }
+  window.scrollTo({ top: 0, behavior: 'instant' });
+}
+
+/* ─── Motion cards ─── */
+function toggleMotionCard(id) {
+  document.getElementById(id).classList.toggle('open');
+}
+
+/* ─── Segment selector ─── */
+let currentSeg = 'full';
+/* ─── Sürüm manifest — ses/manifest.json'dan yüklenir ─── */
+let segMeta = [];  // [{ id, label, labelShort, labelLong, dur, icon, dosya }]
+
+async function loadSegGrid() {
+  const grid = document.getElementById('seg-grid');
+  try {
+    const res = await fetch('./ses/manifest.json');
+    if (!res.ok) throw new Error('manifest yok');
+    segMeta = await res.json();
+  } catch {
+    /* manifest yoksa veya offline — varsayılan tek sürüm */
+    segMeta = [
+      { id:'full', label:'Tam Sürüm', labelShort:'Tam', labelLong:'Tam sürüm', dur:'~24 dk', icon:'◉', dosya:'tam.mp3' }
+    ];
+  }
+
+  grid.innerHTML = segMeta.map((s, i) =>
+    `<button class="seg-btn${i===0?' active':''}" onclick="selectSeg(this,'${s.id}')" id="seg-${s.id}">
+      <div class="seg-icon">${s.icon}</div>
+      <div class="seg-name">${s.label}</div>
+      <div class="seg-dur">${s.dur}</div>
+    </button>`
+  ).join('');
+
+  /* İlk sürümü seç */
+  if (segMeta.length) {
+    currentSeg = segMeta[0].id;
+    loadAudioFromUrl('./ses/' + segMeta[0].dosya);
+  }
+}
+
+function getSegName(id, variant) {
+  const s = segMeta.find(m => m.id === id);
+  if (!s) return id;
+  if (variant === 'short') return s.labelShort || s.label;
+  if (variant === 'long')  return s.labelLong  || s.label;
+  return s.label;
+}
+
+function selectSeg(el, seg) {
+  document.querySelectorAll('.seg-btn').forEach(b => b.classList.remove('active'));
+  el.classList.add('active');
+  currentSeg = seg;
+  const meta = segMeta.find(m => m.id === seg);
+  if (meta) loadAudioFromUrl('./ses/' + meta.dosya);
+}
+
+/* ─── Audio ─── */
+let audioLoaded = false;
+let totalDur = 0;
+
+function loadAudioFromUrl(url) {
+  const aud = document.getElementById('main-audio');
+  /* Çalan varsa durdur, açık oturumu kapat */
+  if (playing) {
+    aud.pause(); playing = false;
+    document.getElementById('play-btn').textContent = '▶';
+  }
+  if (currentSession) endSession(lastCompletePct);
+
+  aud.src = url;
+  aud.onloadedmetadata = function() {
+    totalDur = aud.duration;
+    document.getElementById('time-total').textContent = fmt(totalDur);
+  };
+  audioLoaded = true;
+}
+
+function fmt(s) {
+  if (!s || isNaN(s)) return '0:00';
+  const m = Math.floor(s/60), sec = Math.floor(s%60);
+  return m + ':' + String(sec).padStart(2,'0');
+}
+
+/* ─── Player ─── */
+let playing = false;
+
+/* ─── Exercise session log ─── */
+let currentSession = null;
+let pauseStartTs = null;
+
+function todayStr() {
+  return new Date().toLocaleDateString('tr-TR', {day:'2-digit', month:'2-digit', year:'numeric'});
+}
+
+function startSession() {
+  if (currentSession) return;
+  const aud = document.getElementById('main-audio');
+  currentSession = {
+    date: todayStr(),
+    seg: currentSeg,
+    startTs: Date.now(),
+    endTs: null,
+    pauseCount: 0,
+    pauseMs: 0,
+    completePct: 0,
+    status: 'started',
+  };
+  pauseStartTs = null;
+  updateExerciseUI();
+}
+
+function pauseSession() {
+  if (!currentSession || pauseStartTs) return;
+  pauseStartTs = Date.now();
+  currentSession.pauseCount++;
+  updateExerciseUI();
+}
+
+function resumeSession() {
+  if (!currentSession || !pauseStartTs) return;
+  currentSession.pauseMs += Date.now() - pauseStartTs;
+  pauseStartTs = null;
+  updateExerciseUI();
+}
+
+function endSession(pct) {
+  if (!currentSession) return;
+  if (pauseStartTs) {
+    currentSession.pauseMs += Date.now() - pauseStartTs;
+    pauseStartTs = null;
+  }
+  currentSession.endTs = Date.now();
+  currentSession.completePct = Math.round(pct);
+  currentSession.status = pct >= 80 ? 'complete' : 'partial';
+  exerciseLog.push({...currentSession});
+  currentSession = null;
+  persistData();
+  updateExerciseUI();
+  updateDiaryRelaxField();
+}
+
+function updateExerciseUI() {
+  const badge = document.getElementById('exercise-status-badge');
+  const rows = document.getElementById('exercise-log-rows');
+  const todaySessions = exerciseLog.filter(s => s.date === todayStr());
+
+  if (currentSession) {
+    const paused = !!pauseStartTs;
+    badge.textContent = paused ? 'Duraklatıldı' : 'Devam ediyor';
+    badge.style.background = paused ? 'rgba(224,126,80,0.15)' : 'rgba(95,196,160,0.15)';
+    badge.style.color = paused ? 'var(--warm)' : 'var(--accent2)';
+    const icon = paused ? '⏸' : '▶';
+    rows.innerHTML = `<div style="color:${paused ? 'var(--warm)' : 'var(--accent2)'}">${icon} ${getSegName(currentSession.seg,'short')} — ${new Date(currentSession.startTs).toLocaleTimeString('tr-TR',{hour:'2-digit',minute:'2-digit'})} başladı</div>`;
+    return;
+  }
+
+  if (!todaySessions.length) {
+    badge.textContent = 'Başlanmadı';
+    badge.style.background = 'var(--bg3)';
+    badge.style.color = 'var(--text3)';
+    rows.innerHTML = '<div style="color:var(--text3)">Oynatıcıyı başlatınca kayıt otomatik tutulur.</div>';
+    return;
+  }
+
+  const last = todaySessions[todaySessions.length - 1];
+  const hasComplete = todaySessions.some(s => s.status === 'complete');
+
+  badge.textContent = hasComplete ? 'Tamamlandı' : 'Yarım';
+  badge.style.background = hasComplete ? 'rgba(95,196,160,0.15)' : 'rgba(224,126,80,0.15)';
+  badge.style.color = hasComplete ? 'var(--accent2)' : 'var(--warm)';
+
+  rows.innerHTML = todaySessions.map(s => {
+    const start = new Date(s.startTs).toLocaleTimeString('tr-TR',{hour:'2-digit',minute:'2-digit'});
+    const end = s.endTs ? new Date(s.endTs).toLocaleTimeString('tr-TR',{hour:'2-digit',minute:'2-digit'}) : '—';
+    const dur = s.endTs ? Math.round((s.endTs - s.startTs - s.pauseMs) / 60000) : '—';
+    const pauseSec = Math.round(s.pauseMs / 1000);
+    const statusIcon = s.status === 'complete' ? '✓' : '◑';
+    const statusColor = s.status === 'complete' ? 'var(--accent2)' : 'var(--warm)';
+    return `<div style="display:grid;grid-template-columns:auto 1fr auto;gap:8px;align-items:baseline;padding:5px 0;border-bottom:1px solid var(--border)">
+      <span style="color:${statusColor};font-size:13px">${statusIcon}</span>
+      <span style="color:var(--text2)">${getSegName(s.seg,'short')} &nbsp;<span style="color:var(--text3)">${start}–${end}</span></span>
+      <span style="color:var(--text3);font-family:var(--mono);font-size:11px">${s.completePct}% · ${dur}dk · ${s.pauseCount}x duraklama${s.pauseCount > 0 ? ' ('+pauseSec+'s)' : ''}</span>
+    </div>`;
+  }).join('');
+}
+
+function updateDiaryRelaxField() {
+  const today = todayStr();
+  const todaySessions = exerciseLog.filter(s => s.date === today);
+  const display = document.getElementById('d-relax-display');
+  const hidden = document.getElementById('d-relax');
+  if (!todaySessions.length) {
+    display.textContent = 'Bugün egzersiz kaydı yok';
+    display.style.color = 'var(--text3)';
+    hidden.value = 'no';
+    return;
+  }
+  const hasComplete = todaySessions.some(s => s.status === 'complete');
+  const lines = todaySessions.map(s => {
+    const start = new Date(s.startTs).toLocaleTimeString('tr-TR',{hour:'2-digit',minute:'2-digit'});
+    return `${s.status === 'complete' ? '✓' : '◑'} ${getSegName(s.seg,'long')} — ${start} — %${s.completePct}`;
+  });
+  display.innerHTML = lines.join('<br>');
+  display.style.color = hasComplete ? 'var(--accent2)' : 'var(--warm)';
+  hidden.value = todaySessions[todaySessions.length-1].seg;
+}
+
+function togglePlay() {
+  const aud = document.getElementById('main-audio');
+  if (!audioLoaded) { toast('Önce ses dosyası yükleyin.'); return; }
+  if (playing) {
+    aud.pause(); playing = false;
+    document.getElementById('play-btn').textContent = '▶';
+    pauseSession();
+  } else {
+    aud.play(); playing = true;
+    document.getElementById('play-btn').textContent = '⏸';
+    if (!currentSession) startSession();
+    else resumeSession();
+  }
+}
+
+function skip(s) {
+  const aud = document.getElementById('main-audio');
+  if (!audioLoaded) return;
+  aud.currentTime = Math.max(0, Math.min(aud.currentTime + s, aud.duration || 0));
+}
+
+
+let lastCompletePct = 0;
+
+function onTimeUpdate() {
+  const aud = document.getElementById('main-audio');
+  const cur = aud.currentTime, dur = aud.duration || 1;
+  lastCompletePct = Math.round(cur / dur * 100);
+  document.getElementById('time-current').textContent = fmt(cur);
+  document.getElementById('prog-bar').style.width = (cur/dur*100).toFixed(1) + '%';
+
+  const circle = document.getElementById('timer-ring');
+  const pct = cur / dur;
+  const circ = 2 * Math.PI * 28;
+  circle.style.strokeDashoffset = circ * (1 - pct);
+  document.getElementById('timer-display').textContent = fmt(cur);
+}
+
+function seekAudio(e) {
+  const aud = document.getElementById('main-audio');
+  if (!audioLoaded) return;
+  const wrap = document.getElementById('prog-wrap');
+  const r = wrap.getBoundingClientRect();
+  const pct = (e.clientX - r.left) / r.width;
+  aud.currentTime = pct * (aud.duration || 0);
+}
+
+function onAudioEnd() {
+  playing = false;
+  document.getElementById('play-btn').textContent = '▶';
+  endSession(100);
+}
+
+/* ─── Hint toggles ─── */
+function toggleHint(id) {
+  const box = document.getElementById(id);
+  if (!box) return;
+  box.classList.toggle('open');
+}
+
+/* ─── Diary ─── */
+let diaryQuality = 0;
+
+function setQ(v) {
+  diaryQuality = v;
+  [1,2,3,4,5].forEach(i => {
+    document.getElementById('q'+i).classList.toggle('active', i === v);
+  });
+}
+
+/* ─── Time picker ─── */
+function buildTimePicker(containerId, hiddenId, defaultH, defaultM, defaultPeriod) {
+  const wrap = document.getElementById(containerId);
+  if (!wrap) return;
+
+  // Saat seçeneği (1–12)
+  let hOpts = '';
+  for (let i = 1; i <= 6; i++) hOpts += `<option value="${i}" ${i === defaultH ? 'selected' : ''}>${String(i).padStart(2,'0')}</option>`;
+
+  // Dakika seçeneği (00, 05, 10 ... 55)
+  let mOpts = '';
+  for (let m = 0; m < 60; m += 5) mOpts += `<option value="${m}" ${m === defaultM ? 'selected' : ''}>${String(m).padStart(2,'0')}</option>`;
+
+  wrap.innerHTML = `
+    <select class="tp-h" onchange="syncTimePicker('${containerId}','${hiddenId}')">${hOpts}</select>
+    <span class="tp-sep">:</span>
+    <select class="tp-m" onchange="syncTimePicker('${containerId}','${hiddenId}')">${mOpts}</select>
+    <select class="tp-period tp-period-sel" onchange="syncTimePicker('${containerId}','${hiddenId}')">
+      <option value="gece"  ${defaultPeriod === 'gece'  ? 'selected' : ''}>Gece (00–05)</option>
+      <option value="sabah" ${defaultPeriod === 'sabah' ? 'selected' : ''}>Sabah (06–11)</option>
+      <option value="oson"  ${defaultPeriod === 'oson'  ? 'selected' : ''}>Öğleden Sonra (12–17)</option>
+      <option value="aksam" ${defaultPeriod === 'aksam' ? 'selected' : ''}>Akşam (18–23)</option>
+    </select>
+  `;
+  syncTimePicker(containerId, hiddenId);
+}
+
+function syncTimePicker(containerId, hiddenId) {
+  const wrap   = document.getElementById(containerId);
+  if (!wrap) return;
+  const h      = parseInt(wrap.querySelector('.tp-h').value);
+  const m      = parseInt(wrap.querySelector('.tp-m').value);
+  const period = wrap.querySelector('.tp-period-sel').value;
+  let h24;
+  const offsets = { gece: 0, sabah: 6, oson: 12, aksam: 18 };
+  const base = offsets[period] ?? 0;
+  // h: 1–6 içinde dönem aralığına map et
+  h24 = (base + (h - 1)) % 24;
+  const val = `${String(h24).padStart(2,'0')}:${String(m).padStart(2,'0')}`;
+  document.getElementById(hiddenId).value = val;
+}
+
+function setTimePicker(containerId, hiddenId, timeStr) {
+  // timeStr: "HH:MM" 24 saat
+  if (!timeStr) return;
+  const [h24, m] = timeStr.split(':').map(Number);
+  // Hangi dönem?
+  let period, hInPeriod;
+  if (h24 >= 0 && h24 <= 5)  { period = 'gece';  hInPeriod = h24 - 0; }
+  else if (h24 <= 11)         { period = 'sabah'; hInPeriod = h24 - 6; }
+  else if (h24 <= 17)         { period = 'oson';  hInPeriod = h24 - 12; }
+  else                        { period = 'aksam'; hInPeriod = h24 - 18; }
+  const h12 = hInPeriod + 1;  // 1 tabanlı (1–6)
+  const wrap = document.getElementById(containerId);
+  if (!wrap) return;
+  wrap.querySelector('.tp-h').value = h12;
+  // Dakikayı en yakın 5'e yuvarla
+  const mRound = Math.round(m / 5) * 5 % 60;
+  wrap.querySelector('.tp-m').value = mRound;
+  wrap.querySelector('.tp-period-sel').value = period;
+  syncTimePicker(containerId, hiddenId);
+}
+
+function initDiary() {
+  const now = new Date();
+  const d = now.toLocaleDateString('tr-TR', {day:'2-digit', month:'2-digit', year:'numeric'});
+  document.getElementById('d-date').value = d;
+
+  // Time picker'ları kur — makul uyku varsayılanları
+  buildTimePicker('tp-bed',  'd-bed',  6, 0,  'aksam');  // Yatış: 23:00
+  buildTimePicker('tp-try',  'd-try',  6, 15, 'aksam');  // Uyuma: 23:15
+  buildTimePicker('tp-wake', 'd-wake', 1, 0,  'sabah');  // Uyanış: 07:00
+  buildTimePicker('tp-out',  'd-out',  1, 30, 'sabah');  // Kalkış: 07:30
+
+  // Saat değerlerini 24s formatına çevir (gece saatleri için)
+  // Yatış 23:00
+  document.getElementById('d-bed').value  = '23:00';
+  document.getElementById('d-try').value  = '23:15';
+  document.getElementById('d-wake').value = '07:00';
+  document.getElementById('d-out').value  = '07:30';
+
+  // Sayısal varsayılanlar
+  document.getElementById('d-sol').value  = '15';
+  document.getElementById('d-nwak').value = '1';
+  document.getElementById('d-waso').value = '10';
+  document.getElementById('d-tst').value  = '7';
+}
+
+function saveDiary(e) {
+  e.preventDefault();
+  const rec = {
+    date: document.getElementById('d-date').value,
+    bed: document.getElementById('d-bed').value,
+    trySleep: document.getElementById('d-try').value,
+    sol: document.getElementById('d-sol').value,
+    nwak: document.getElementById('d-nwak').value,
+    waso: document.getElementById('d-waso').value,
+    wake: document.getElementById('d-wake').value,
+    out: document.getElementById('d-out').value,
+    tst: document.getElementById('d-tst').value,
+    quality: diaryQuality,
+    relax: document.getElementById('d-relax').value,
+    meds: document.getElementById('d-meds').value,
+    notes: document.getElementById('d-notes').value,
+    ts: Date.now(),
+  };
+  if (!rec.date) { toast('Tarih gerekli.'); return; }
+  diaryData.push(rec);
+  persistData();
+  renderHistory();
+  toast('Kaydedildi ✓');
+  clearForm();
+}
+
+/* ─── Storage: localStorage with file:// fallback ─── */
+let diaryData = [];
+let exerciseLog = [];
+
+function persistData() {
+  try {
+    localStorage.setItem('uyku_diary', JSON.stringify(diaryData));
+    localStorage.setItem('uyku_exercise', JSON.stringify(exerciseLog));
+  } catch(e) {}
+}
+
+function loadPersistedData() {
+  try {
+    const s = localStorage.getItem('uyku_diary');
+    if (s) diaryData = JSON.parse(s);
+    const e = localStorage.getItem('uyku_exercise');
+    if (e) exerciseLog = JSON.parse(e);
+  } catch(e) {
+    diaryData = []; exerciseLog = [];
+  }
+}
+
+function getDiaryData() {
+  return diaryData;
+}
+
+function clearForm() {
+  ['d-sol','d-nwak','d-waso','d-tst','d-meds','d-notes'].forEach(id => {
+    document.getElementById(id).value = '';
+  });
+  diaryQuality = 0;
+  [1,2,3,4,5].forEach(i => document.getElementById('q'+i).classList.remove('active'));
+  initDiary();
+}
+
+function renderHistory() {
+  const data = getDiaryData().slice().reverse().slice(0,20);
+  const relMap = {full:'Tam',short:'Kısa',shoulder:'Omuz',no:'Hayır','':'—'};
+  const rows = data.map(r =>
+    `<tr>
+      <td>${r.date}</td>
+      <td>${r.bed||'—'}</td>
+      <td>${r.tst||'—'}</td>
+      <td>${r.nwak||'—'}</td>
+      <td>${r.quality ? '★'.repeat(r.quality) + '☆'.repeat(5-r.quality) : '—'}</td>
+      <td>${relMap[r.relax]||'—'}</td>
+      <td><button onclick="deleteEntry(${r.ts})" style="background:none;border:none;color:var(--text3);cursor:pointer;font-size:12px">✕</button></td>
+    </tr>`
+  ).join('');
+  document.getElementById('hist-body').innerHTML = rows || '<tr><td colspan="7" style="color:var(--text3);text-align:center;padding:16px">Henüz kayıt yok</td></tr>';
+}
+
+function deleteEntry(ts) {
+  diaryData = diaryData.filter(r => r.ts !== ts);
+  persistData();
+  renderHistory();
+  renderCharts();
+}
+
+function exportCSV() {
+  const data = getDiaryData();
+  if (!data.length) { toast('Kayıt yok.'); return; }
+  const header = 'Tarih,YatısSaati,UyumaSaati,UykuBaşlama(dk),UyanışSayısı,WASO(dk),SonUyanış,KalkışSaati,ToplamUyku(saat),Kalite,Egzersiz,İlaçlar,Notlar\n';
+  const rows = data.map(r =>
+    [r.date,r.bed,r.trySleep,r.sol,r.nwak,r.waso,r.wake,r.out,r.tst,r.quality,r.relax,r.meds,r.notes]
+    .map(v => '"' + (v||'').toString().replace(/"/g,'""') + '"').join(',')
+  ).join('\n');
+  const blob = new Blob(['\uFEFF' + header + rows], {type:'text/csv;charset=utf-8'});
+  const a = document.createElement('a');
+  a.href = URL.createObjectURL(blob); a.download = 'uyku_gunlugu.csv'; a.click();
+}
+
+function exportJSON() {
+  const data = getDiaryData();
+  if (!data.length) { toast('Kayıt yok.'); return; }
+  const blob = new Blob([JSON.stringify(data, null, 2)], {type:'application/json'});
+  const a = document.createElement('a');
+  a.href = URL.createObjectURL(blob); a.download = 'uyku_gunlugu.json'; a.click();
+}
+
+function importJSON(e) {
+  const file = e.target.files[0]; if (!file) return;
+  const reader = new FileReader();
+  reader.onload = function(ev) {
+    try {
+      const imported = JSON.parse(ev.target.result);
+      if (!Array.isArray(imported)) { toast('Geçersiz dosya.'); return; }
+      const existing = getDiaryData();
+      const existingTs = new Set(existing.map(r => r.ts));
+      const newRecs = imported.filter(r => !existingTs.has(r.ts));
+      diaryData = [...existing, ...newRecs].sort((a,b) => a.ts - b.ts);
+      persistData();
+      renderHistory();
+      toast(newRecs.length + ' yeni kayıt eklendi.');
+    } catch { toast('Dosya okunamadı.'); }
+  };
+  reader.readAsText(file);
+  e.target.value = '';
+}
+
+/* ─── Charts ─── */
+let charts = {};
+function renderCharts() {
+  const data = getDiaryData().slice(-30);
+  const labels = data.map(r => r.date.slice(0,5));
+  const quality = data.map(r => r.quality || null);
+  const tst = data.map(r => parseFloat(r.tst) || null);
+  const nwak = data.map(r => parseInt(r.nwak) || 0);
+
+  // Stats
+  const validQ = quality.filter(Boolean);
+  const validT = tst.filter(Boolean);
+  document.getElementById('s-entries').textContent = getDiaryData().length;
+  document.getElementById('s-avg-q').textContent = validQ.length ? (validQ.reduce((a,b)=>a+b,0)/validQ.length).toFixed(1) + '/5' : '—';
+  document.getElementById('s-avg-tst').textContent = validT.length ? (validT.reduce((a,b)=>a+b,0)/validT.length).toFixed(1) + 'sa' : '—';
+
+  const cfg = {
+    responsive: true,
+    plugins: { legend: { display: false } },
+    scales: {
+      x: { ticks: { color: '#4d7a98', font: {size:10} }, grid: { color: 'rgba(100,160,220,0.06)' } },
+      y: { ticks: { color: '#4d7a98', font: {size:10} }, grid: { color: 'rgba(100,160,220,0.06)' } },
+    },
+  };
+
+  function mkChart(id, type, ydata, color, ymin, ymax) {
+    const ctx = document.getElementById(id).getContext('2d');
+    if (charts[id]) charts[id].destroy();
+    charts[id] = new Chart(ctx, {
+      type,
+      data: {
+        labels,
+        datasets: [{
+          data: ydata,
+          backgroundColor: color + '33',
+          borderColor: color,
+          borderWidth: 2,
+          pointRadius: 3,
+          pointBackgroundColor: color,
+          fill: type === 'line',
+          tension: 0.35,
+          spanGaps: true,
+        }]
+      },
+      options: { ...cfg, scales: { ...cfg.scales, y: { ...cfg.scales.y, min: ymin, max: ymax } } }
+    });
+  }
+
+  mkChart('chart-quality', 'line', quality, '#3a9dd4', 0, 5.5);
+  mkChart('chart-tst', 'bar', tst, '#5fc4a0', 0, null);
+  mkChart('chart-nwak', 'bar', nwak, '#c97bc4', 0, null);
+}
+
+/* ─── Study phase config ─── */
+// Fazlar: baseline 7 gün, müdahale 56 gün (8 hafta), takip 28 gün (4 hafta)
+const PHASES = [
+  { key: 'baseline',      label: 'Ön İzlem',  days: 7  },
+  { key: 'intervention',  label: 'Müdahale',  days: 56 },
+  { key: 'followup',      label: 'Takip',     days: 28 },
+];
+const TOTAL_DAYS = 91; // 7+56+28
+
+function getStudyState() {
+  try {
+    const start = localStorage.getItem('study_start');
+    return start ? { startDate: new Date(start) } : null;
+  } catch { return null; }
+}
+
+function setStudyStart(dateStr) {
+  try { localStorage.setItem('study_start', dateStr); } catch {}
+}
+
+function getCurrentPhase(startDate) {
+  const elapsed = Math.floor((Date.now() - startDate.getTime()) / 86400000);
+  let acc = 0;
+  for (const ph of PHASES) {
+    if (elapsed < acc + ph.days) {
+      return { ...ph, dayInPhase: elapsed - acc + 1, elapsed };
+    }
+    acc += ph.days;
+  }
+  return { key: 'done', label: 'Tamamlandı', dayInPhase: 0, elapsed };
+}
+
+function updatePhasePill() {
+  const state = getStudyState();
+  const pill  = document.getElementById('phase-pill');
+  const label = document.getElementById('phase-label');
+  const days  = document.getElementById('phase-days');
+  const headerPill = document.getElementById('header-phase-pill');
+  if (!state) {
+    label.textContent = 'Çalışma başlatılmadı';
+    days.textContent  = '';
+    if (headerPill) headerPill.textContent = '';
+    return;
+  }
+  const ph = getCurrentPhase(state.startDate);
+  label.textContent = ph.label;
+  const remaining = ph.key === 'done' ? 0 :
+    (PHASES.find(p => p.key === ph.key)?.days || 0) - ph.dayInPhase + 1;
+  days.textContent = ph.key === 'done' ? '✓ Bitti' : `· ${remaining} gün kaldı`;
+  if (headerPill) {
+    headerPill.textContent = ph.key === 'done' ? '✓ ' + ph.label : ph.label;
+    headerPill.style.background = ph.key === 'pre' ? 'rgba(58,157,212,0.15)' :
+      ph.key === 'intervention' ? 'rgba(95,196,160,0.15)' :
+      ph.key === 'followup' ? 'rgba(224,126,80,0.15)' : 'rgba(95,196,160,0.2)';
+    headerPill.style.color = ph.key === 'pre' ? 'var(--accent)' :
+      ph.key === 'intervention' ? 'var(--accent2)' :
+      ph.key === 'followup' ? 'var(--accent3)' : 'var(--accent2)';
+  }
+}
+
+/* ─── Sunday / milestone share banner ─── */
+function checkShareBanner() {
+  const banner = document.getElementById('share-banner');
+  const state  = getStudyState();
+  if (!state) { banner.classList.remove('visible'); return; }
+
+  // Pazar mı?
+  const isSunday = new Date().getDay() === 0;
+  // Banner bugün zaten gösterildi mi?
+  const shownToday = localStorage.getItem('banner_shown') === new Date().toDateString();
+  if (shownToday) { banner.classList.remove('visible'); return; }
+
+  const ph = getCurrentPhase(state.startDate);
+
+  // Dönem sonu mu? (müdahale veya takip bitti)
+  const isMilestone = ph.key === 'done' ||
+    (ph.key === 'followup' && ph.dayInPhase === 1) ||
+    (ph.key === 'intervention' && ph.dayInPhase === 1);
+
+  if (isMilestone) {
+    document.getElementById('share-banner-title').textContent =
+      ph.key === 'done' ? 'Çalışma tamamlandı — verilerinizi gönderin' :
+      ph.key === 'followup' ? 'Müdahale dönemi bitti — ara veri paylaşımı' :
+      'Takip dönemi başladı';
+    document.getElementById('share-banner-sub').textContent =
+      'Araştırmacıya tüm verilerinizi gönderin. Telefondaki paylaşım menüsü açılacak.';
+    banner.classList.add('visible');
+    return;
+  }
+
+  if (isSunday) {
+    document.getElementById('share-banner-title').textContent = 'Haftanın verilerini paylaşın';
+    document.getElementById('share-banner-sub').textContent =
+      'Bu haftaki uyku ve egzersiz kayıtlarınızı araştırmacıya iletin.';
+    banner.classList.add('visible');
+  }
+}
+
+function dismissBanner() {
+  document.getElementById('share-banner').classList.remove('visible');
+  try { localStorage.setItem('banner_shown', new Date().toDateString()); } catch {}
+}
+
+/* ─── Web Share API ─── */
+function buildSharePayload(scope) {
+  const now   = new Date();
+  const cutoff = scope === 'week'
+    ? new Date(now.getTime() - 7 * 86400000)
+    : new Date(0);
+
+  const diary = diaryData.filter(r => new Date(r.ts) >= cutoff);
+  const exLog = exerciseLog.filter(r => new Date(r.startTs) >= cutoff.getTime());
+
+  const payload = {
+    participantCode: participantCode || anonymousId,
+    exportDate:      now.toISOString(),
+    scope,
+    studyPhase:      getStudyState() ? getCurrentPhase(getStudyState().startDate).label : '—',
+    sleepDiary:      diary,
+    exerciseLog:     exLog,
+  };
+  return JSON.stringify(payload, null, 2);
+}
+
+async function shareData(scope) {
+  const json  = buildSharePayload(scope);
+  const label = scope === 'week' ? 'bu_hafta' : 'tum_veri';
+  const fname = `uyku_${participantCode || anonymousId}_${label}_${new Date().toISOString().slice(0,10)}.json`;
+  const text  = `Duy ve Gevşe — ${scope === 'week' ? 'Haftalık' : 'Tüm'} Veri\nKatılımcı: ${participantCode || anonymousId}\nTarih: ${new Date().toLocaleDateString('tr-TR')}\n\n${json}`;
+
+  // Web Share API — dosya paylaşımı destekleniyorsa
+  if (navigator.share) {
+    try {
+      if (navigator.canShare && navigator.canShare({ files: [new File([json], fname, { type: 'application/json' })] })) {
+        await navigator.share({
+          title: 'Uyku Verisi',
+          text:  `Katılımcı: ${participantCode || anonymousId}`,
+          files: [new File([json], fname, { type: 'application/json' })],
+        });
+      } else {
+        await navigator.share({ title: 'Uyku Verisi', text });
+      }
+      toast('Paylaşıldı ✓');
+      dismissBanner();
+      return;
+    } catch (err) {
+      if (err.name === 'AbortError') return; // kullanıcı iptal etti
+    }
+  }
+
+  // Fallback: panoya kopyala
+  try {
+    await navigator.clipboard.writeText(text);
+    toast('Panoya kopyalandı — yapıştırarak gönderin.');
+  } catch {
+    // Son fallback: indirme
+    const blob = new Blob([json], { type: 'application/json' });
+    const a = document.createElement('a');
+    a.href = URL.createObjectURL(blob);
+    a.download = fname;
+    a.click();
+    toast('Dosya indirildi.');
+  }
+  dismissBanner();
+}
+
+/* ─── Participant / consent state ─── */
+let participantCode = '';
+let anonymousId = '';
+let consentGiven = false;
+
+function loadParticipantState() {
+  try {
+    consentGiven    = localStorage.getItem('consent') === 'yes';
+    participantCode = localStorage.getItem('participant_code') || '';
+    anonymousId     = localStorage.getItem('anonymous_id') || '';
+    if (!anonymousId) {
+      anonymousId = 'anon-' + Math.random().toString(36).slice(2,10) + '-' + Date.now().toString(36);
+      localStorage.setItem('anonymous_id', anonymousId);
+    }
+  } catch {
+    anonymousId = 'anon-' + Math.random().toString(36).slice(2,10);
+  }
+}
+
+function checkOnboarding() {
+  loadParticipantState();
+  try {
+    const seen = localStorage.getItem('onboarding_done');
+    if (seen) { document.getElementById('onboarding-overlay').classList.add('hidden'); }
+  } catch {
+    document.getElementById('onboarding-overlay').classList.add('hidden');
+  }
+}
+
+function onConsentChange() {
+  const checked = document.getElementById('consent-check').checked;
+  document.getElementById('code-section').style.display = checked ? 'block' : 'none';
+  const btn = document.getElementById('onboard-confirm-btn');
+  btn.disabled = !checked;
+  btn.style.opacity = checked ? '1' : '.4';
+  btn.style.cursor  = checked ? 'pointer' : 'not-allowed';
+}
+
+function confirmOnboarding() {
+  consentGiven    = true;
+  participantCode = document.getElementById('participant-code-input').value.trim();
+  const startVal  = document.getElementById('study-start-input').value;
+  try {
+    localStorage.setItem('consent', 'yes');
+    localStorage.setItem('participant_code', participantCode);
+    localStorage.setItem('onboarding_done', 'yes');
+    if (!localStorage.getItem('anonymous_id')) localStorage.setItem('anonymous_id', anonymousId);
+    if (startVal) setStudyStart(startVal);
+    else setStudyStart(new Date().toISOString().slice(0,10));
+  } catch {}
+  document.getElementById('onboarding-overlay').classList.add('hidden');
+  toast('Katılım kaydedildi. Teşekkürler.');
+}
+
+function skipOnboarding() {
+  consentGiven = false;
+  try { localStorage.setItem('onboarding_done', 'yes'); } catch {}
+  document.getElementById('onboarding-overlay').classList.add('hidden');
+}
+
+/* ─── Toast ─── */
+function toast(msg) {
+  const t = document.getElementById('toast');
+  t.textContent = msg;
+  t.classList.add('show');
+  setTimeout(() => t.classList.remove('show'), 2600);
+}
+
+/* ─── Init ─── */
+loadPersistedData();
+
+// URL'den katılımcı kodu oku (?k=BAL-042)
+try {
+  const urlCode = new URLSearchParams(window.location.search).get('k');
+  if (urlCode && !localStorage.getItem('participant_code')) {
+    participantCode = urlCode.toUpperCase();
+    localStorage.setItem('participant_code', participantCode);
+  }
+} catch {}
+
+checkOnboarding();
+// Onboarding tarih alanına bugünü doldur
+try {
+  const si = document.getElementById('study-start-input');
+  if (si) si.value = new Date().toISOString().slice(0,10);
+  // URL'den kod geldiyse onboarding input'una da yaz
+  if (participantCode) {
+    const ci = document.getElementById('participant-code-input');
+    if (ci) ci.value = participantCode;
+  }
+} catch {}
+initDiary();
+renderHistory();
+updateExerciseUI();
+updateDiaryRelaxField();
+updatePhasePill();
+loadSegGrid();
+
+/* ── Service Worker kaydı ── */
+if ('serviceWorker' in navigator) {
+  window.addEventListener('load', () => {
+    navigator.serviceWorker.register('./sw.js')
+      .catch(err => console.warn('SW kaydı başarısız:', err));
+  });
+}
+</script>
+</body>
+</html>

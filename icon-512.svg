@@ -1,0 +1,22 @@
+<svg width="512" height="512" viewBox="0 0 512 512" xmlns="http://www.w3.org/2000/svg">
+  <rect width="512" height="512" rx="112" fill="#07111f"/>
+  <line x1="42" y1="256" x2="470" y2="256" stroke="#1a3048" stroke-width="1.5"/>
+
+  <!-- Sempatik — yüksekten alçalır -->
+  <path d="M 52 96
+           C 100 96, 138 128, 174 170
+           C 210 212, 232 238, 276 266
+           C 314 290, 362 294, 460 294"
+        fill="none" stroke="#e07e50" stroke-width="7" stroke-linecap="round"/>
+
+  <!-- Parasempatik — alçaktan yükselir -->
+  <path d="M 52 416
+           C 100 416, 138 384, 174 342
+           C 210 300, 232 274, 276 246
+           C 314 222, 362 218, 460 218"
+        fill="none" stroke="#3a9dd4" stroke-width="7" stroke-linecap="round"/>
+
+  <!-- Denge noktaları -->
+  <circle cx="460" cy="294" r="9" fill="#e07e50" opacity="0.85"/>
+  <circle cx="460" cy="218" r="11" fill="#3a9dd4" opacity="0.9"/>
+</svg>

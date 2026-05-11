@@ -1,0 +1,20 @@
+[
+  {
+    "id":         "full",
+    "label":      "Tam Sürüm",
+    "labelShort": "Tam",
+    "labelLong":  "Tam sürüm",
+    "dur":        "~24 dk",
+    "icon":       "◉",
+    "dosya":      "tam.mp3"
+  },
+  {
+    "id":         "masa",
+    "label":      "Masa Başı",
+    "labelShort": "Masa Başı",
+    "labelLong":  "Masa başı sürümü",
+    "dur":        "~12 dk",
+    "icon":       "◎",
+    "dosya":      "masa.mp3"
+  }
+]
