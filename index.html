@@ -5,6 +5,16 @@
 <meta name="viewport" content="width=device-width, initial-scale=1.0">
 <meta name="theme-color" content="#0a1628">
 <meta name="apple-mobile-web-app-capable" content="yes">
+<meta name="mobile-web-app-capable" content="yes">
+<meta name="apple-mobile-web-app-status-bar-style" content="black-translucent">
+<meta name="apple-mobile-web-app-title" content="Duy ve Gevşe">
+<link rel="apple-touch-icon" href="./icon-180.png">
+<link rel="apple-touch-icon" sizes="180x180" href="./icon-180.png">
+<link rel="apple-touch-icon" sizes="192x192" href="./icon-192.png">
+<link rel="apple-touch-icon" sizes="512x512" href="./icon-512.png">
+<link rel="icon" type="image/png" sizes="192x192" href="./icon-192.png">
+<link rel="icon" type="image/png" sizes="512x512" href="./icon-512.png">
+<link rel="manifest" href="./manifest.json">
 <title>Duy ve Gevşe</title>
 <style>
 @import url('https://fonts.googleapis.com/css2?family=IBM+Plex+Sans:wght@300;400;500;600&family=IBM+Plex+Mono:wght@400;500&display=swap');
@@ -1067,19 +1077,35 @@ function getSegName(id, variant) {
   return s.label;
 }
 
-function selectSeg(el, seg) {
+async function selectSeg(el, seg) {
+  /* Mevcut aktif düğmeyi yedekle — yükleme başarısız olursa geri döneceğiz */
+  const previousActive = document.querySelector('.seg-btn.active');
+  const previousSeg    = currentSeg;
+
   document.querySelectorAll('.seg-btn').forEach(b => b.classList.remove('active'));
   el.classList.add('active');
   currentSeg = seg;
+
   const meta = segMeta.find(m => m.id === seg);
-  if (meta) loadAudioFromUrl('./ses/' + meta.dosya);
+  if (!meta) return;
+
+  const ok = await loadAudioFromUrl('./ses/' + meta.dosya);
+  /* Yükleme başarısız ise (dosya yok) önceki seçime dön */
+  if (!ok && previousActive && previousActive !== el) {
+    el.classList.remove('active');
+    previousActive.classList.add('active');
+    currentSeg = previousSeg;
+    /* Önceki sesi tekrar yükle — kullanıcı yine de oynat'a basabilsin */
+    const prevMeta = segMeta.find(m => m.id === previousSeg);
+    if (prevMeta) await loadAudioFromUrl('./ses/' + prevMeta.dosya);
+  }
 }
 
 /* ─── Audio ─── */
 let audioLoaded = false;
 let totalDur = 0;
 
-function loadAudioFromUrl(url) {
+async function loadAudioFromUrl(url) {
   const aud = document.getElementById('main-audio');
   /* Çalan varsa durdur, açık oturumu kapat */
   if (playing) {
@@ -1088,12 +1114,25 @@ function loadAudioFromUrl(url) {
   }
   if (currentSession) endSession(lastCompletePct);
 
+  /* Dosyanın var olup olmadığını kontrol et — HEAD request */
+  try {
+    const head = await fetch(url, { method: 'HEAD' });
+    if (!head.ok) throw new Error('not found');
+  } catch {
+    audioLoaded = false;
+    aud.removeAttribute('src');
+    document.getElementById('time-total').textContent = '—:—';
+    toast('Bu sürüm henüz yüklenmedi.');
+    return false;
+  }
+
   aud.src = url;
   aud.onloadedmetadata = function() {
     totalDur = aud.duration;
     document.getElementById('time-total').textContent = fmt(totalDur);
   };
   audioLoaded = true;
+  return true;
 }
 
 function fmt(s) {
@@ -1165,32 +1204,8 @@ function updateExerciseUI() {
   const rows = document.getElementById('exercise-log-rows');
   const todaySessions = exerciseLog.filter(s => s.date === todayStr());
 
-  if (currentSession) {
-    const paused = !!pauseStartTs;
-    badge.textContent = paused ? 'Duraklatıldı' : 'Devam ediyor';
-    badge.style.background = paused ? 'rgba(224,126,80,0.15)' : 'rgba(95,196,160,0.15)';
-    badge.style.color = paused ? 'var(--warm)' : 'var(--accent2)';
-    const icon = paused ? '⏸' : '▶';
-    rows.innerHTML = `<div style="color:${paused ? 'var(--warm)' : 'var(--accent2)'}">${icon} ${getSegName(currentSession.seg,'short')} — ${new Date(currentSession.startTs).toLocaleTimeString('tr-TR',{hour:'2-digit',minute:'2-digit'})} başladı</div>`;
-    return;
-  }
-
-  if (!todaySessions.length) {
-    badge.textContent = 'Başlanmadı';
-    badge.style.background = 'var(--bg3)';
-    badge.style.color = 'var(--text3)';
-    rows.innerHTML = '<div style="color:var(--text3)">Oynatıcıyı başlatınca kayıt otomatik tutulur.</div>';
-    return;
-  }
-
-  const last = todaySessions[todaySessions.length - 1];
-  const hasComplete = todaySessions.some(s => s.status === 'complete');
-
-  badge.textContent = hasComplete ? 'Tamamlandı' : 'Yarım';
-  badge.style.background = hasComplete ? 'rgba(95,196,160,0.15)' : 'rgba(224,126,80,0.15)';
-  badge.style.color = hasComplete ? 'var(--accent2)' : 'var(--warm)';
-
-  rows.innerHTML = todaySessions.map(s => {
+  /* Tamamlanan oturumlar için satırlar — currentSession varsa bile gösterilir */
+  const completedRows = todaySessions.map(s => {
     const start = new Date(s.startTs).toLocaleTimeString('tr-TR',{hour:'2-digit',minute:'2-digit'});
     const end = s.endTs ? new Date(s.endTs).toLocaleTimeString('tr-TR',{hour:'2-digit',minute:'2-digit'}) : '—';
     const dur = s.endTs ? Math.round((s.endTs - s.startTs - s.pauseMs) / 60000) : '—';
@@ -1203,6 +1218,33 @@ function updateExerciseUI() {
       <span style="color:var(--text3);font-family:var(--mono);font-size:11px">${s.completePct}% · ${dur}dk · ${s.pauseCount}x duraklama${s.pauseCount > 0 ? ' ('+pauseSec+'s)' : ''}</span>
     </div>`;
   }).join('');
+
+  if (currentSession) {
+    const paused = !!pauseStartTs;
+    badge.textContent = paused ? 'Duraklatıldı' : 'Devam ediyor';
+    badge.style.background = paused ? 'rgba(224,126,80,0.15)' : 'rgba(95,196,160,0.15)';
+    badge.style.color = paused ? 'var(--warm)' : 'var(--accent2)';
+    const icon = paused ? '⏸' : '▶';
+    const activeRow = `<div style="color:${paused ? 'var(--warm)' : 'var(--accent2)'};padding:5px 0;border-bottom:1px solid var(--border)">${icon} ${getSegName(currentSession.seg,'short')} — ${new Date(currentSession.startTs).toLocaleTimeString('tr-TR',{hour:'2-digit',minute:'2-digit'})} başladı</div>`;
+    /* Tamamlananlar önce, aktif oturum altta */
+    rows.innerHTML = completedRows + activeRow;
+    return;
+  }
+
+  if (!todaySessions.length) {
+    badge.textContent = 'Başlanmadı';
+    badge.style.background = 'var(--bg3)';
+    badge.style.color = 'var(--text3)';
+    rows.innerHTML = '<div style="color:var(--text3)">Oynatıcıyı başlatınca kayıt otomatik tutulur.</div>';
+    return;
+  }
+
+  const hasComplete = todaySessions.some(s => s.status === 'complete');
+  badge.textContent = hasComplete ? 'Tamamlandı' : 'Yarım';
+  badge.style.background = hasComplete ? 'rgba(95,196,160,0.15)' : 'rgba(224,126,80,0.15)';
+  badge.style.color = hasComplete ? 'var(--accent2)' : 'var(--warm)';
+
+  rows.innerHTML = completedRows;
 }
 
 function updateDiaryRelaxField() {
@@ -1228,7 +1270,7 @@ function updateDiaryRelaxField() {
 
 function togglePlay() {
   const aud = document.getElementById('main-audio');
-  if (!audioLoaded) { toast('Önce ses dosyası yükleyin.'); return; }
+  if (!audioLoaded) { toast('Bu sürüm henüz hazır değil.'); return; }
   if (playing) {
     aud.pause(); playing = false;
     document.getElementById('play-btn').textContent = '▶';
