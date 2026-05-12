@@ -11,18 +11,18 @@
 
    Strateji:
    - Kabuk dosyaları (HTML, manifest, ikonlar):
-     "Cache first, ağdan güncelle" — her zaman hızlı açılır,
-     arka planda sessizce güncellenir.
-   - Ses dosyaları: ilk oynatmada önbelleğe alınır,
-     sonraki oynatmalar offline çalışır.
-   - Google Fonts: ağdan gelirse önbelleğe al, yoksa
-     önbellekten sun (yedek: sistem fontu CSS'de zaten var).
+     "Cache first, ağdan güncelle"
+   - Ses dosyaları: ses/manifest.json okunur, listedeki tüm sesler
+     install sırasında komple GET ile indirilir ve önbelleğe alınır.
+     <audio> Range request yapsa bile cache'ten parça parça servis edilir.
+   - Google Fonts: stale-while-revalidate
+   - HEAD, OPTIONS gibi non-GET istekleri SW'den geçmez.
 ───────────────────────────────────────────── */
 
-const CACHE_VERSION = 'duygevse-v2';
-const CACHE_STATIC  = 'duygevse-static-v2';
-const CACHE_MEDIA   = 'duygevse-media-v2';
-const CACHE_FONTS   = 'duygevse-fonts-v2';
+const CACHE_VERSION = 'duygevse-v4';
+const CACHE_STATIC  = 'duygevse-static-v4';
+const CACHE_MEDIA   = 'duygevse-media-v4';
+const CACHE_FONTS   = 'duygevse-fonts-v4';
 
 /* Uygulama kabuğu — bunlar mutlaka önbelleğe alınsın */
 const STATIC_ASSETS = [
@@ -34,20 +34,47 @@ const STATIC_ASSETS = [
   './icon-180.png',
 ];
 
-/* ── Kurulum: kabuk dosyalarını önbelleğe al ── */
+/* ── Kurulum: kabuk + ses manifesti okunur, sesler arka planda indirilir ── */
 self.addEventListener('install', event => {
   event.waitUntil(
-    caches.open(CACHE_STATIC)
-      .then(cache => cache.addAll(STATIC_ASSETS))
+    Promise.all([
+      caches.open(CACHE_STATIC).then(cache => cache.addAll(STATIC_ASSETS)),
+      precacheAudioFiles(),
+    ])
       .then(() => self.skipWaiting())
       .catch(err => {
-        /* Bir dosya bile eksikse cache.addAll tüm kaydı iptal eder.
-           Hatayı konsola yaz ki teşhis kolaylaşsın. */
         console.error('SW kurulum hatası:', err);
-        throw err;
       })
   );
 });
+
+/* Ses dosyalarını manifest'ten okuyup önceden cache'le */
+async function precacheAudioFiles() {
+  try {
+    const res = await fetch('./ses/manifest.json');
+    if (!res.ok) return;
+    const list = await res.json();
+    const cache = await caches.open(CACHE_MEDIA);
+
+    /* Her ses dosyasını paralel olarak GET ile çek — Range değil, tam dosya.
+       Bir tanesi başarısız olsa diğerleri etkilenmesin diye allSettled. */
+    await Promise.allSettled(
+      list.map(async item => {
+        const url = './ses/' + item.dosya;
+        try {
+          const response = await fetch(url);
+          if (response && response.ok) {
+            await cache.put(url, response);
+          }
+        } catch {
+          /* Tek dosya kaçırsa sorun değil */
+        }
+      })
+    );
+  } catch (err) {
+    console.warn('Ses precache atlandı:', err);
+  }
+}
 
 /* ── Aktivasyon: eski önbellekleri temizle ── */
 self.addEventListener('activate', event => {
@@ -65,32 +92,104 @@ self.addEventListener('activate', event => {
 
 /* ── Fetch: istek türüne göre strateji seç ── */
 self.addEventListener('fetch', event => {
-  const url = new URL(event.request.url);
+  const request = event.request;
 
-  /* Google Fonts → önce ağ, sonra önbellek (stale-while-revalidate) */
+  /* GET olmayan istekleri SW'den geçirme */
+  if (request.method !== 'GET') return;
+
+  const url = new URL(request.url);
+
+  /* Google Fonts → stale-while-revalidate */
   if (url.hostname.includes('fonts.googleapis.com') ||
       url.hostname.includes('fonts.gstatic.com')) {
-    event.respondWith(staleWhileRevalidate(event.request, CACHE_FONTS));
+    event.respondWith(staleWhileRevalidate(request, CACHE_FONTS));
     return;
   }
 
-  /* Ses dosyaları → önce önbellek; yoksa ağdan al ve önbelleğe yaz */
+  /* Ses dosyaları — Range request olabilir, özel handler */
   if (url.pathname.match(/\.(mp3|ogg|wav|m4a)$/i)) {
-    event.respondWith(cacheFirstThenNetwork(event.request, CACHE_MEDIA));
+    event.respondWith(handleAudioRequest(request, CACHE_MEDIA));
     return;
   }
 
-  /* Görsel dosyalar → aynı strateji */
+  /* Görsel dosyalar → cache-first */
   if (url.pathname.match(/\.(gif|png|jpg|jpeg|webp|svg)$/i)) {
-    event.respondWith(cacheFirstThenNetwork(event.request, CACHE_MEDIA));
+    event.respondWith(cacheFirstThenNetwork(request, CACHE_MEDIA));
     return;
   }
 
-  /* Uygulama kabuğu ve diğer → önce önbellek, arka planda güncelle */
-  event.respondWith(staleWhileRevalidate(event.request, CACHE_STATIC));
+  /* Uygulama kabuğu ve diğer → stale-while-revalidate */
+  event.respondWith(staleWhileRevalidate(request, CACHE_STATIC));
 });
 
 /* ─── Yardımcı fonksiyonlar ─── */
+
+/* Ses isteklerinin özel ele alınması — Range request desteği */
+async function handleAudioRequest(request, cacheName) {
+  const cache = await caches.open(cacheName);
+  const rangeHeader = request.headers.get('range');
+
+  /* Önbellekte tam dosya var mı? URL ile ara çünkü Range header'ı eşleşmeyebilir. */
+  const cached = await cache.match(request.url);
+
+  if (cached) {
+    if (rangeHeader) {
+      return buildRangeResponse(cached, rangeHeader);
+    }
+    return cached;
+  }
+
+  /* Önbellekte yok — ağdan al */
+  try {
+    const fullResponse = await fetch(request.url);
+    if (fullResponse && fullResponse.ok) {
+      cache.put(request.url, fullResponse.clone()).catch(() => {});
+
+      if (rangeHeader) {
+        return buildRangeResponse(fullResponse, rangeHeader);
+      }
+      return fullResponse;
+    }
+    return fullResponse;
+  } catch {
+    return new Response('Çevrimdışı: ses dosyası önbellekte yok.', {
+      status: 503,
+      headers: { 'Content-Type': 'text/plain; charset=utf-8' }
+    });
+  }
+}
+
+/* Tam dosyadan Range cevabı üret */
+async function buildRangeResponse(response, rangeHeader) {
+  const buffer = await response.arrayBuffer();
+  const total  = buffer.byteLength;
+
+  const match = /^bytes=(\d+)-(\d*)$/.exec(rangeHeader);
+  if (!match) {
+    return new Response(buffer, {
+      status: 200,
+      headers: {
+        'Content-Type': response.headers.get('content-type') || 'audio/mpeg',
+        'Content-Length': String(total),
+        'Accept-Ranges': 'bytes',
+      }
+    });
+  }
+
+  const start = parseInt(match[1], 10);
+  const end   = match[2] ? parseInt(match[2], 10) : total - 1;
+  const slice = buffer.slice(start, end + 1);
+
+  return new Response(slice, {
+    status: 206,
+    headers: {
+      'Content-Type': response.headers.get('content-type') || 'audio/mpeg',
+      'Content-Length': String(slice.byteLength),
+      'Content-Range': `bytes ${start}-${end}/${total}`,
+      'Accept-Ranges': 'bytes',
+    }
+  });
+}
 
 /* Önce önbellekten sun, arka planda ağdan güncelle */
 async function staleWhileRevalidate(request, cacheName) {
@@ -99,7 +198,7 @@ async function staleWhileRevalidate(request, cacheName) {
   const fetchPromise = fetch(request)
     .then(response => {
       if (response && response.status === 200) {
-        cache.put(request, response.clone());
+        cache.put(request, response.clone()).catch(() => {});
       }
       return response;
     })
@@ -117,11 +216,10 @@ async function cacheFirstThenNetwork(request, cacheName) {
   try {
     const response = await fetch(request);
     if (response && response.status === 200) {
-      cache.put(request, response.clone());
+      cache.put(request, response.clone()).catch(() => {});
     }
     return response;
   } catch {
-    /* Ağ yok ve önbellekte de yok — 503 döndür */
     return new Response('Çevrimdışı: bu kaynak henüz önbelleğe alınmadı.', {
       status: 503,
       headers: { 'Content-Type': 'text/plain; charset=utf-8' }
