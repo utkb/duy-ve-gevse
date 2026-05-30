@@ -59,7 +59,7 @@ nav {
   backdrop-filter: blur(12px);
   border-top: 1px solid var(--border);
   display: flex; align-items: stretch;
-  padding: 0; height: 72px;
+  padding: 0; height: 60px;
   /* iOS safe area desteği */
   padding-bottom: env(safe-area-inset-bottom);
 }
@@ -70,7 +70,7 @@ nav {
 .nav-btn {
   background: none; border: none; cursor: pointer;
   color: var(--text3); font-family: var(--font);
-  font-size: 12px; font-weight: 500;
+  font-size: 11px; font-weight: 500;
   padding: 0 4px; border-radius: 0;
   transition: all .2s; white-space: nowrap;
   flex: 1; text-align: center;
@@ -79,7 +79,7 @@ nav {
 }
 .nav-btn::before {
   content: attr(data-icon);
-  font-size: 20px; line-height: 1;
+  font-size: 15px; line-height: 1;
   opacity: 0.7;
 }
 .nav-btn:hover { color: var(--text2); }
@@ -435,11 +435,11 @@ canvas { display: block; }
 </header>
 
 <nav>
-  <button class="nav-btn active" data-icon="❋" onclick="goto('home')">Ön Hazırlık</button>
+  <button class="nav-btn active" data-icon="◈" onclick="goto('home')">Ön Hazırlık</button>
   <button class="nav-btn" data-icon="▶" onclick="goto('guide')">Sesli Rehber</button>
-  <button class="nav-btn" data-icon="✍" onclick="goto('diary')">Günlük</button>
-  <button class="nav-btn" data-icon="∿" onclick="goto('stats')">Grafik</button>
-  <button class="nav-btn" data-icon="⊙" onclick="goto('about')">Hakkında</button>
+  <button class="nav-btn" data-icon="◻" onclick="goto('diary')">Günlük</button>
+  <button class="nav-btn" data-icon="◫" onclick="goto('stats')">Grafik</button>
+  <button class="nav-btn" data-icon="◌" onclick="goto('about')">Hakkında</button>
 </nav>
 
 <!-- ════════════════════════════════ HOME / HAREKET ════════════════════════════════ -->
@@ -467,7 +467,7 @@ canvas { display: block; }
     <div class="motion-card-body">
       <p class="motion-desc">Omuzları tavana doğru itin → derin nefes alın → nefes verirken yatağa bastırın → bırakın.</p>
       <div class="figure-wrap">
-        <div class="motion-svg" style="display:flex;align-items:center;justify-content:center;background:var(--bg2);border:1px dashed var(--border);border-radius:8px;color:var(--text3);font-size:13px;font-family:var(--mono)">[ Omuz Öne — görsel buraya gelecek ]</div>
+        <img src="./gorseller/omuz-one.png" alt="Omuz öne hareketi" class="motion-svg" style="border-radius:8px;object-fit:contain;background:var(--bg2)">
       </div>
     </div>
   </div>
@@ -484,7 +484,7 @@ canvas { display: block; }
     <div class="motion-card-body">
       <p class="motion-desc">Omuzları kulaklara doğru çekin → nefes alın → nefes verirken ayaklara doğru itin → bırakın.</p>
       <div class="figure-wrap">
-        <div class="motion-svg" style="display:flex;align-items:center;justify-content:center;background:var(--bg2);border:1px dashed var(--border);border-radius:8px;color:var(--text3);font-size:13px;font-family:var(--mono)">[ Omuz Yukarı — görsel buraya gelecek ]</div>
+        <img src="./gorseller/omuz-yukari.png" alt="Omuz yukarı hareketi" class="motion-svg" style="border-radius:8px;object-fit:contain;background:var(--bg2)">
       </div>
     </div>
   </div>
@@ -501,7 +501,7 @@ canvas { display: block; }
     <div class="motion-card-body">
       <p class="motion-desc">Elleri başın arkasına koyun. Dirsekleri tavana itin → nefes alın → nefes verirken yatağa bastırın → bırakın.</p>
       <div class="figure-wrap">
-        <div class="motion-svg" style="display:flex;align-items:center;justify-content:center;background:var(--bg2);border:1px dashed var(--border);border-radius:8px;color:var(--text3);font-size:13px;font-family:var(--mono)">[ Göğüs Kafesi — görsel buraya gelecek ]</div>
+        <img src="./gorseller/gogus.png" alt="Göğüs kafesini açma hareketi" class="motion-svg" style="border-radius:8px;object-fit:contain;background:var(--bg2)">
       </div>
     </div>
   </div>
@@ -518,7 +518,7 @@ canvas { display: block; }
     <div class="motion-card-body">
       <p class="motion-desc">Bacakları içe çevirin → nefes alın → nefes verirken dışa yanlara doğru çevirin → bırakın.</p>
       <div class="figure-wrap">
-        <div class="motion-svg" style="display:flex;align-items:center;justify-content:center;background:var(--bg2);border:1px dashed var(--border);border-radius:8px;color:var(--text3);font-size:13px;font-family:var(--mono)">[ Kalça — görsel buraya gelecek ]</div>
+        <img src="./gorseller/kalca.png" alt="Kalça gevşetme hareketi" class="motion-svg" style="border-radius:8px;object-fit:contain;background:var(--bg2)">
       </div>
     </div>
   </div>
@@ -535,7 +535,7 @@ canvas { display: block; }
     <div class="motion-card-body">
       <p class="motion-desc">Ayakları kendinize doğru çekin (gaz pedalının tersi) → nefes alın → nefes verirken öne itin → bırakın.</p>
       <div class="figure-wrap">
-        <div class="motion-svg" style="display:flex;align-items:center;justify-content:center;background:var(--bg2);border:1px dashed var(--border);border-radius:8px;color:var(--text3);font-size:13px;font-family:var(--mono)">[ Bacak — görsel buraya gelecek ]</div>
+        <img src="./gorseller/bacak.png" alt="Bacak gevşetme hareketi" class="motion-svg" style="border-radius:8px;object-fit:contain;background:var(--bg2)">
       </div>
     </div>
   </div>
@@ -552,7 +552,7 @@ canvas { display: block; }
     <div class="motion-card-body">
       <p class="motion-desc">Baş boyun bükme: dış boyun kaslarını kasmadan, başın arkasını yastıkta yukarı kaydırarak küçük bir "evet" hareketi yapın. Çene göğse yaklaşır.</p>
       <div class="figure-wrap">
-        <div class="motion-svg" style="display:flex;align-items:center;justify-content:center;background:var(--bg2);border:1px dashed var(--border);border-radius:8px;color:var(--text3);font-size:13px;font-family:var(--mono)">[ Boyun/KSF — görsel buraya gelecek ]</div>
+        <img src="./gorseller/boyun-ksf.png" alt="Boyun kraniyo-servikal fleksiyon hareketi" class="motion-svg" style="border-radius:8px;object-fit:contain;background:var(--bg2)">
       </div>
     </div>
   </div>
@@ -569,7 +569,7 @@ canvas { display: block; }
     <div class="motion-card-body">
       <p class="motion-desc">Dişleri değdirin → nefes alın → nefes verirken ağzı açmadan alt çeneyi aşağı çektirin → bırakın. Dişler birbirine değmez, hafif aralık.</p>
       <div class="figure-wrap">
-        <div class="motion-svg" style="display:flex;align-items:center;justify-content:center;background:var(--bg2);border:1px dashed var(--border);border-radius:8px;color:var(--text3);font-size:13px;font-family:var(--mono)">[ Çene — görsel buraya gelecek ]</div>
+        <img src="./gorseller/cene.png" alt="Çene rahatlatma hareketi" class="motion-svg" style="border-radius:8px;object-fit:contain;background:var(--bg2)">
       </div>
     </div>
   </div>
@@ -1311,19 +1311,28 @@ function buildTimePicker(containerId, hiddenId, defaultH, defaultM, defaultPerio
   const wrap = document.getElementById(containerId);
   if (!wrap) return;
 
-  // Saat seçeneği (1–12)
-  let hOpts = '';
-  for (let i = 1; i <= 6; i++) hOpts += `<option value="${i}" ${i === defaultH ? 'selected' : ''}>${String(i).padStart(2,'0')}</option>`;
-
   // Dakika seçeneği (00, 05, 10 ... 55)
   let mOpts = '';
   for (let m = 0; m < 60; m += 5) mOpts += `<option value="${m}" ${m === defaultM ? 'selected' : ''}>${String(m).padStart(2,'0')}</option>`;
 
+  const offsets = { gece: 0, sabah: 6, oson: 12, aksam: 18 };
+
+  // Saat seçeneği — etiketi seçili döneme göre gerçek saati gösterir (00–05 / 06–11 / 12–17 / 18–23)
+  function buildHOpts(period, selH) {
+    const base = offsets[period] ?? 0;
+    let opts = '';
+    for (let i = 1; i <= 6; i++) {
+      const label = String((base + i - 1) % 24).padStart(2, '0');
+      opts += `<option value="${i}" ${i === selH ? 'selected' : ''}>${label}</option>`;
+    }
+    return opts;
+  }
+
   wrap.innerHTML = `
-    <select class="tp-h" onchange="syncTimePicker('${containerId}','${hiddenId}')">${hOpts}</select>
+    <select class="tp-h" onchange="syncTimePicker('${containerId}','${hiddenId}')">${buildHOpts(defaultPeriod, defaultH)}</select>
     <span class="tp-sep">:</span>
     <select class="tp-m" onchange="syncTimePicker('${containerId}','${hiddenId}')">${mOpts}</select>
-    <select class="tp-period tp-period-sel" onchange="syncTimePicker('${containerId}','${hiddenId}')">
+    <select class="tp-period tp-period-sel" onchange="rebuildHours('${containerId}','${hiddenId}')">
       <option value="gece"  ${defaultPeriod === 'gece'  ? 'selected' : ''}>Gece (00–05)</option>
       <option value="sabah" ${defaultPeriod === 'sabah' ? 'selected' : ''}>Sabah (06–11)</option>
       <option value="oson"  ${defaultPeriod === 'oson'  ? 'selected' : ''}>Öğleden Sonra (12–17)</option>
@@ -1333,17 +1342,36 @@ function buildTimePicker(containerId, hiddenId, defaultH, defaultM, defaultPerio
   syncTimePicker(containerId, hiddenId);
 }
 
+function rebuildHours(containerId, hiddenId) {
+  const wrap   = document.getElementById(containerId);
+  if (!wrap) return;
+  const period = wrap.querySelector('.tp-period-sel').value;
+  const offsets = { gece: 0, sabah: 6, oson: 12, aksam: 18 };
+  const base   = offsets[period] ?? 0;
+  const hSel   = wrap.querySelector('.tp-h');
+  const curVal = parseInt(hSel.value) || 1;
+  hSel.innerHTML = '';
+  for (let i = 1; i <= 6; i++) {
+    const label = String((base + i - 1) % 24).padStart(2, '0');
+    const opt   = document.createElement('option');
+    opt.value   = i;
+    opt.textContent = label;
+    if (i === curVal) opt.selected = true;
+    hSel.appendChild(opt);
+  }
+  syncTimePicker(containerId, hiddenId);
+}
+
+
 function syncTimePicker(containerId, hiddenId) {
   const wrap   = document.getElementById(containerId);
   if (!wrap) return;
   const h      = parseInt(wrap.querySelector('.tp-h').value);
   const m      = parseInt(wrap.querySelector('.tp-m').value);
   const period = wrap.querySelector('.tp-period-sel').value;
-  let h24;
   const offsets = { gece: 0, sabah: 6, oson: 12, aksam: 18 };
   const base = offsets[period] ?? 0;
-  // h: 1–6 içinde dönem aralığına map et
-  h24 = (base + (h - 1)) % 24;
+  const h24 = (base + (h - 1)) % 24;
   const val = `${String(h24).padStart(2,'0')}:${String(m).padStart(2,'0')}`;
   document.getElementById(hiddenId).value = val;
 }
